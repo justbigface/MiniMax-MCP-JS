@@ -108,6 +108,9 @@ pnpm install -g minimax-mcp-js
 
 进入 `Cursor → Preferences → Cursor Settings → MCP → Add new global MCP Server` 添加上述配置。
 
+⚠️ **注意**: 如果您在 Cursor 中使用 MiniMax MCP JS 时遇到 "No tools found" 错误，请将 Cursor 升级到最新版本。
+更多信息，请参阅这个[讨论帖](https://forum.cursor.com/t/mcp-servers-no-tools-found/49094/23).
+
 完成以上步骤后，您的MCP客户端就可以通过这些工具与MiniMax进行交互了。
 
 **本地开发**:
@@ -307,13 +310,6 @@ pnpm run build
 # 运行 MCP 服务器
 pnpm start
 ```
-
-## 常见问题
-
-### Cursor 显示 "No tools found" 错误
-如果您在 Cursor 中使用 MiniMax MCP JS 时遇到 "No tools found" 错误，请将 Cursor 升级到最新版本。
-更多信息，请参阅这个[讨论帖](https://forum.cursor.com/t/mcp-servers-no-tools-found/49094/23)。 
-
 
 ## 许可证
 

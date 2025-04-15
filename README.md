@@ -108,6 +108,8 @@ Go to `Claude > Settings > Developer > Edit Config > claude_desktop_config.json`
 
 Go to `Cursor → Preferences → Cursor Settings → MCP → Add new global MCP Server` to add the above config.
 
+⚠️ **Note**: If you encounter a "No tools found" error when using MiniMax MCP JS with Cursor, please update your Cursor to the latest version. For more information, see this [discussion thread](https://forum.cursor.com/t/mcp-servers-no-tools-found/49094/23).
+
 That's it. Your MCP client can now interact with MiniMax through these tools.
 
 **For local development**: 
@@ -308,13 +310,6 @@ pnpm run build
 # Run the MCP server
 pnpm start
 ```
-
-## FAQ
-
-### Cursor shows "No tools found" error
-If you encounter a "No tools found" error when using MiniMax MCP JS with Cursor, please update your Cursor to the latest version.
-For more information, see this [discussion thread](https://forum.cursor.com/t/mcp-servers-no-tools-found/49094/23).
-
 
 ## License
 

@@ -1,7 +1,7 @@
 {
   "name": "minimax-mcp-js",
   "version": "0.0.2",
-  "description": "MCP server with Minimax API integration for image generation, video generation, and text-to-speech",
+  "description": "Official MiniMax Model Context Protocol (MCP) JavaScript implementation that provides seamless integration with MiniMax's powerful AI capabilities including image generation, video generation, text-to-speech, and voice cloning APIs.",
   "main": "build/index.js",
   "type": "module",
   "bin": {
