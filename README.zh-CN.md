@@ -1,0 +1,320 @@
+![export](https://github.com/MiniMax-AI/MiniMax-01/raw/main/figures/MiniMaxLogo-Light.png)
+
+<div align="center">
+
+# MiniMax MCP JS
+
+MiniMax MCP JS 是 MiniMax MCP 的 JavaScript/TypeScript 实现，提供图像生成、视频生成、文本转语音等功能。
+
+<div style="line-height: 1.5;">
+  <a href="https://www.minimax.io" target="_blank" style="margin: 2px; color: var(--fgColor-default);">
+    <img alt="Homepage" src="https://img.shields.io/badge/_Homepage-MiniMax-FF4040?style=flat-square&labelColor=2C3E50&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNDkwLjE2IDQxMS43Ij48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2ZmZjt9PC9zdHlsZT48L2RlZnM+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjMzLjQ1LDQwLjgxYTE3LjU1LDE3LjU1LDAsMSwwLTM1LjEsMFYzMzEuNTZhNDAuODIsNDAuODIsMCwwLDEtODEuNjMsMFYxNDVhMTcuNTUsMTcuNTUsMCwxLDAtMzUuMDksMHY3OS4wNmE0MC44Miw0MC44MiwwLDAsMS04MS42MywwVjE5NS40MmExMS42MywxMS42MywwLDAsMSwyMy4yNiwwdjI4LjY2YTE3LjU1LDE3LjU1LDAsMCwwLDM1LjEsMFYxNDVBNDAuODIsNDAuODIsMCwwLDEsMTQwLDE0NVYzMzEuNTZhMTcuNTUsMTcuNTUsMCwwLDAsMzUuMSwwVjIxNy41aDBWNDAuODFhNDAuODEsNDAuODEsMCwxLDEsODEuNjIsMFYyODEuNTZhMTEuNjMsMTEuNjMsMCwxLDEtMjMuMjYsMFptMjE1LjksNjMuNEE0MC44Niw0MC44NiwwLDAsMCw0MDguNTMsMTQ1VjMwMC44NWExNy41NSwxNy41NSwwLDAsMS0zNS4wOSwwdi0yNjBhNDAuODIsNDAuODIsMCwwLDAtODEuNjMsMFYzNzAuODlhMTcuNTUsMTcuNTUsMCwwLDEtMzUuMSwwVjMzMGExMS42MywxMS42MywwLDEsMC0yMy4yNiwwdjQwLjg2YTQwLjgxLDQwLjgxLDAsMCwwLDgxLjYyLDBWNDAuODFhMTcuNTUsMTcuNTUsMCwwLDEsMzUuMSwwdjI2MGE0MC44Miw0MC44MiwwLDAsMCw4MS42MywwVjE0NWExNy41NSwxNy41NSwwLDEsMSwzNS4xLDBWMjgxLjU2YTExLjYzLDExLjYzLDAsMCwwLDIzLjI2LDBWMTQ1QTQwLjg1LDQwLjg1LDAsMCwwLDQ0OS4zNSwxMDQuMjFaIi8+PC9zdmc+&logoWidth=20" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+  <a href="https://arxiv.org/abs/2501.08313" target="_blank" style="margin: 2px;">
+    <img alt="Paper" src="https://img.shields.io/badge/📖_Paper-MiniMax--01-FF4040?style=flat-square&labelColor=2C3E50" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+  <a href="https://chat.minimax.io/" target="_blank" style="margin: 2px;">
+    <img alt="Chat" src="https://img.shields.io/badge/_MiniMax_Chat-FF4040?style=flat-square&labelColor=2C3E50&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNDkwLjE2IDQxMS43Ij48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2ZmZjt9PC9zdHlsZT48L2RlZnM+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjMzLjQ1LDQwLjgxYTE3LjU1LDE3LjU1LDAsMSwwLTM1LjEsMFYzMzEuNTZhNDAuODIsNDAuODIsMCwwLDEtODEuNjMsMFYxNDVhMTcuNTUsMTcuNTUsMCwxLDAtMzUuMDksMHY3OS4wNmE0MC44Miw0MC44MiwwLDAsMS04MS42MywwVjE5NS40MmExMS42MywxMS42MywwLDAsMSwyMy4yNiwwdjI4LjY2YTE3LjU1LDE3LjU1LDAsMCwwLDM1LjEsMFYxNDVBNDAuODIsNDAuODIsMCwwLDEsMTQwLDE0NVYzMzEuNTZhMTcuNTUsMTcuNTUsMCwwLDAsMzUuMSwwVjIxNy41aDBWNDAuODFhNDAuODEsNDAuODEsMCwxLDEsODEuNjIsMFYyODEuNTZhMTEuNjMsMTEuNjMsMCwxLDEtMjMuMjYsMFptMjE1LjksNjMuNEE0MC44Niw0MC44NiwwLDAsMCw0MDguNTMsMTQ1VjMwMC44NWExNy41NSwxNy41NSwwLDAsMS0zNS4wOSwwdi0yNjBhNDAuODIsNDAuODIsMCwwLDAtODEuNjMsMFYzNzAuODlhMTcuNTUsMTcuNTUsMCwwLDEtMzUuMSwwVjMzMGExMS42MywxMS42MywwLDEsMC0yMy4yNiwwdjQwLjg2YTQwLjgxLDQwLjgxLDAsMCwwLDgxLjYyLDBWNDAuODFhMTcuNTUsMTcuNTUsMCwwLDEsMzUuMSwwdjI2MGE0MC44Miw0MC44MiwwLDAsMCw4MS42MywwVjE0NWExNy41NSwxNy41NSwwLDEsMSwzNS4xLDBWMjgxLjU2YTExLjYzLDExLjYzLDAsMCwwLDIzLjI2LDBWMTQ1QTQwLjg1LDQwLjg1LDAsMCwwLDQ0OS4zNSwxMDQuMjFaIi8+PC9zdmc+&logoWidth=20" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+  <a href="https://www.minimax.io/platform" style="margin: 2px;">
+    <img alt="API" src="https://img.shields.io/badge/⚡_API-Platform-FF4040?style=flat-square&labelColor=2C3E50" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+</div>
+
+<div style="line-height: 1.5;">
+  <a href="https://huggingface.co/MiniMaxAI" target="_blank" style="margin: 2px;">
+    <img alt="Hugging Face" src="https://img.shields.io/badge/🤗_Hugging_Face-MiniMax-FF4040?style=flat-square&labelColor=2C3E50" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+  <a href="https://github.com/MiniMax-AI/MiniMax-01/blob/main/figures/wechat-qrcode.jpeg" target="_blank" style="margin: 2px;">
+    <img alt="WeChat" src="https://img.shields.io/badge/_WeChat-MiniMax-FF4040?style=flat-square&labelColor=2C3E50" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+  <a href="https://www.modelscope.cn/organization/MiniMax" target="_blank" style="margin: 2px;">
+    <img alt="ModelScope" src="https://img.shields.io/badge/_ModelScope-MiniMax-FF4040?style=flat-square&labelColor=2C3E50" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+</div>
+
+<div style="line-height: 1.5;">
+  <a href="https://github.com/MiniMax-AI/MiniMax-MCP-JS/blob/main/LICENSE" style="margin: 2px;">
+    <img alt="Code License" src="https://img.shields.io/badge/_Code_License-MIT-FF4040?style=flat-square&labelColor=2C3E50" style="display: inline-block; vertical-align: middle;"/>
+  </a>
+</div>
+
+</div>
+
+## 文档
+
+- [English Documentation](README.md)
+- [Python 版本](https://github.com/MiniMax-AI/MiniMax-MCP) - MiniMax MCP的官方Python实现
+
+## 功能特性
+
+- 文本转语音 (TTS)
+- 图像生成
+- 视频生成
+- 语音克隆
+- 动态配置（支持环境变量和请求参数）
+- 兼容MCP平台托管（ModelScope, MCP SO等）
+
+## 安装
+
+```bash
+# 使用 pnpm 安装（推荐）
+pnpm add minimax-mcp-js
+```
+
+## 快速开始
+
+MiniMax MCP JS 实现了 [Model Context Protocol (MCP)](https://github.com/anthropics/model-context-protocol) 规范，可以作为服务器与支持 MCP 的客户端（如 Claude AI）进行交互。
+
+### 使用 MCP 客户端的快速开始
+
+1. 从[MiniMax国内开放平台](https://platform.minimaxi.com/user-center/basic-information/interface-key)或[MiniMax国际开放平台](https://www.minimax.io/platform/user-center/basic-information/interface-key)获取您的 API 密钥。
+2. 使用 pnpm 安装包：`pnpm add minimax-mcp-js`
+
+### 通过 MCP 客户端使用（推荐）
+
+1. 全局安装 CLI 工具：
+```bash
+# 全局安装
+pnpm install -g minimax-mcp-js
+```
+
+2. 在 MCP 客户端中配置：
+
+#### Claude Desktop
+
+进入 `Claude > Settings > Developer > Edit Config > claude_desktop_config.json` 添加如下配置:
+
+```json
+{
+  "mcpServers": {
+    "minimax-mcp-js": {
+      "command": "npx",
+      "args": [
+        "minimax-mcp-js"
+      ],
+      "env": {
+        "MINIMAX_API_KEY": "<您的API密钥>",
+        "MINIMAX_MCP_BASE_PATH": "<本地输出目录路径>",
+        "MINIMAX_API_HOST": "https://api.minimax.chat",
+        "MINIMAX_API_RESOURCE_MODE": "url"
+      }
+    }
+  }
+}
+```
+
+#### Cursor
+
+进入 `Cursor → Preferences → Cursor Settings → MCP → Add new global MCP Server` 添加上述配置。
+
+完成以上步骤后，您的MCP客户端就可以通过这些工具与MiniMax进行交互了。
+
+**本地开发**:
+在本地开发时，您可以使用 `npm link` 来测试您的更改：
+```bash
+# 在您的项目目录中
+npm link
+```
+
+⚠️ **注意**：API密钥需要与主机地址匹配，在国际版和中国大陆版使用不同的主机地址：
+- 全球版主机地址: `https://api.minimaxi.chat` (注意多了一个 "i")
+- 中国大陆版主机地址: `https://api.minimax.chat`
+
+## 配置方式
+
+MiniMax-MCP-JS 提供了多种灵活的配置方式，以适应不同的使用场景。配置的优先级从高到低排列如下：
+
+### 1. 请求参数配置 (最高优先级)
+
+在平台托管环境（如ModelScope或其他MCP平台）中，可以通过请求参数中的`meta.auth`对象为每个请求提供独立的配置：
+
+```json
+{
+  "params": {
+    "meta": {
+      "auth": {
+        "api_key": "您的API密钥",
+        "api_host": "https://api.minimax.chat",
+        "base_path": "/输出路径",
+        "resource_mode": "url"
+      }
+    }
+  }
+}
+```
+
+这种方式允许多租户使用，每个请求可以使用不同的API密钥和配置。
+
+### 2. API配置
+
+当在其他项目中作为模块使用时，可以通过`startMiniMaxMCP`函数传入配置：
+
+```javascript
+import { startMiniMaxMCP } from 'minimax-mcp-js';
+
+await startMiniMaxMCP({
+  apiKey: '您的API密钥',
+  apiHost: 'https://api.minimax.chat',
+  basePath: '/输出路径',
+  resourceMode: 'url'
+});
+```
+
+### 3. 命令行参数
+
+当作为CLI工具使用时，可以通过命令行参数提供配置：
+
+```bash
+minimax-mcp-js --api-key 您的API密钥 --api-host https://api.minimax.chat --base-path /输出路径 --resource-mode url
+```
+
+### 4. 环境变量 (最低优先级)
+
+最基本的配置方式，通过环境变量提供：
+
+```bash
+# MiniMax API 密钥 (必需)
+MINIMAX_API_KEY=您的API密钥
+
+# 输出文件的基础路径 (可选，默认为用户桌面)
+MINIMAX_MCP_BASE_PATH=~/Desktop
+
+# MiniMax API 主机 (可选，默认为 https://api.minimax.chat)
+MINIMAX_API_HOST=https://api.minimax.chat
+
+# 资源模式 (可选，默认为 'url')
+# 选项: 'url' (返回URL), 'local' (本地保存文件)
+MINIMAX_API_RESOURCE_MODE=url
+```
+
+## 配置项说明
+
+| 配置项 | 描述 | 默认值 |
+|-------|------|--------|
+| apiKey | MiniMax API 密钥 | 无（必填） |
+| apiHost | MiniMax API 主机地址 | https://api.minimax.chat |
+| basePath | 输出文件的基础路径 | 用户桌面 |
+| resourceMode | 资源处理模式，'url' 或 'local' | url |
+
+⚠️ **注意**：API密钥需要与主机地址匹配，在国际版和中国大陆版使用不同的主机地址：
+- 全球版主机地址: `https://api.minimaxi.chat` (注意多了一个 "i")
+- 中国大陆版主机地址: `https://api.minimax.chat`
+
+
+## 使用示例
+
+⚠️ 注意：使用这些工具可能会产生费用。
+
+### 1. 播报晚间新闻片段
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/Snipaste_2025-04-09_20-07-53.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+
+### 2. 克隆声音
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/Snipaste_2025-04-09_19-45-13.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+
+### 3. 生成视频
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/Snipaste_2025-04-09_19-58-52.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/Snipaste_2025-04-09_19-59-43.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle; "/>
+
+### 4. 生成图像
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/gen_image.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/gen_image1.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle; "/>
+
+## 可用工具
+
+### 文本转语音
+
+将文本转换为语音文件。
+
+参数：
+- `text`: 要转换的文本 (必需)
+- `model`: 模型版本，选项为 'speech-02-hd', 'speech-02-turbo', 'speech-01-hd', 'speech-01-turbo', 'speech-01-240228', 'speech-01-turbo-240228'，默认为 'speech-02-hd'
+- `voiceId`: 语音 ID，默认为 'male-qn-qingse'
+- `speed`: 语速，范围 0.5-2.0，默认为 1.0
+- `vol`: 音量，范围 0.1-10.0，默认为 1.0
+- `pitch`: 音调，范围 -12 到 12，默认为 0
+- `emotion`: 情感，选项为 'happy', 'sad', 'angry', 'fearful', 'disgusted', 'surprised', 'neutral'，默认为 'happy'。注意：此参数仅对 'speech-02-hd', 'speech-02-turbo', 'speech-01-turbo', 'speech-01-hd' 模型有效
+- `format`: 音频格式，选项为 'mp3', 'pcm', 'flac', 'wav'，默认为 'mp3'
+- `sampleRate`: 采样率 (Hz)，选项为 8000, 16000, 22050, 24000, 32000, 44100，默认为 32000
+- `bitrate`: 比特率 (bps)，选项为 64000, 96000, 128000, 160000, 192000, 224000, 256000, 320000，默认为 128000
+- `channel`: 音频通道数，选项为 1 或 2，默认为 1
+- `languageBoost`: 语言增强，默认为 'auto'
+- `latexRead`: 启用LaTeX公式朗读
+- `pronunciationDict`: 发音词典
+- `stream`: 启用流式输出
+- `subtitleEnable`: 启用字幕生成
+- `outputDirectory`: 保存输出文件的目录 (可选)
+- `outputFile`: 保存输出文件的路径 (可选，如果未提供则自动生成)
+
+### 文本生成图像
+
+根据文本提示生成图像。
+
+参数：
+- `prompt`: 图像描述 (必需)
+- `model`: 模型版本，默认为 'image-01'
+- `aspectRatio`: 宽高比，默认为 '1:1'，选项为 '1:1', '16:9','4:3', '3:2', '2:3', '3:4', '9:16', '21:9'
+- `n`: 生成图像数量，范围 1-9，默认为 1
+- `promptOptimizer`: 是否优化提示，默认为 true
+- `subjectReference`: 角色参考的本地图像文件路径或公共 URL (可选)
+- `outputDirectory`: 保存输出文件的目录 (可选)
+- `outputFile`: 保存输出文件的路径 (可选，如果未提供则自动生成)
+
+### 生成视频
+
+根据文本提示生成视频。
+
+参数：
+- `prompt`: 视频描述 (必需)
+- `model`: 模型版本，选项为 'T2V-01', 'T2V-01-Director', 'I2V-01', 'I2V-01-Director', 'I2V-01-live', 'S2V-01'，默认为 'T2V-01'
+- `firstFrameImage`: 第一帧图像路径 (可选)
+- `outputDirectory`: 保存输出文件的目录 (可选)
+- `outputFile`: 保存输出文件的路径 (可选，如果未提供则自动生成)
+
+### 语音克隆
+
+从音频文件克隆语音。
+
+参数：
+- `audioFile`: 音频文件路径 (必需)
+- `voiceId`: 语音 ID (必需)
+- `text`: 演示音频的文本 (可选)
+- `outputDirectory`: 保存输出文件的目录 (可选)
+
+## 开发
+
+### 设置
+
+```bash
+# 克隆仓库
+git clone https://github.com/MiniMax-AI/MiniMax-MCP-JS.git
+cd minimax-mcp-js
+
+# 安装依赖
+pnpm install
+```
+
+### 构建
+
+```bash
+# 构建项目
+pnpm run build
+```
+
+### 运行
+
+```bash
+# 运行 MCP 服务器
+pnpm start
+```
+
+## 常见问题
+
+### Cursor 显示 "No tools found" 错误
+如果您在 Cursor 中使用 MiniMax MCP JS 时遇到 "No tools found" 错误，请将 Cursor 升级到最新版本。
+更多信息，请参阅这个[讨论帖](https://forum.cursor.com/t/mcp-servers-no-tools-found/49094/23)。 
+
+
+## 许可证
+
+MIT 
