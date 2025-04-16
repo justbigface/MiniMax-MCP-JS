@@ -69,7 +69,7 @@ MiniMax MCP JS implements the [Model Context Protocol (MCP)](https://github.com/
 ### Quickstart with MCP Client
 
 1. Get your API key from [MiniMax International Platform](https://www.minimax.io/platform/user-center/basic-information/interface-key).
-2. Install the package using pnpm: `pnpm add minimax-mcp-js`
+2. Install [minimax-mcp-js](https://www.npmjs.com/package/minimax-mcp-js) using pnpm: `pnpm add minimax-mcp-js`
 
 ### Using with MCP Clients (Recommended)
 
