@@ -1,0 +1,11 @@
+{
+  "apiKey": "your_api_key_here",
+  "apiHost": "https://api.minimax.chat",
+  "basePath": "~/Desktop",
+  "resourceMode": "url",
+  "server": {
+    "mode": "stdio",
+    "port": 9593,
+    "endpoint": "/rest"
+  }
+} 

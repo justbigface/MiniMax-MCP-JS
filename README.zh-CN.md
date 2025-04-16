@@ -53,7 +53,7 @@ MiniMax MCP JS 是 MiniMax MCP 的 JavaScript/TypeScript 实现，提供图像�
 - 视频生成
 - 语音克隆
 - 动态配置（支持环境变量和请求参数）
-- 兼容MCP平台托管（ModelScope, MCP SO等）
+- 兼容MCP平台托管（ModelScope和其他MCP平台）
 
 ## 安装
 
@@ -94,10 +94,10 @@ pnpm install -g minimax-mcp-js
         "minimax-mcp-js"
       ],
       "env": {
+        "MINIMAX_API_HOST": "https://api.minimax.chat",
         "MINIMAX_API_KEY": "<您的API密钥>",
         "MINIMAX_MCP_BASE_PATH": "<本地输出目录路径>",
-        "MINIMAX_API_HOST": "https://api.minimax.chat",
-        "MINIMAX_API_RESOURCE_MODE": "url"
+        "MINIMAX_RESOURCE_MODE": "url"
       }
     }
   }
@@ -123,6 +123,18 @@ npm link
 ⚠️ **注意**：API密钥需要与主机地址匹配，在国际版和中国大陆版使用不同的主机地址：
 - 全球版主机地址: `https://api.minimaxi.chat` (注意多了一个 "i")
 - 中国大陆版主机地址: `https://api.minimax.chat`
+
+## 传输模式
+
+MiniMax MCP JS 支持三种传输模式:
+
+| 特性 | stdio (默认) | REST | SSE |
+|:-----|:-----|:-----|:-----|
+| 运行环境 | 本地运行 | 可本地或云端部署 | 可本地或云端部署 |
+| 通信方式 | 通过`标准输入输出`通信 | 通过`HTTP请求`通信 | 通过`服务器发送事件`通信 |
+| 适用场景 | 本地MCP客户端集成 | API服务，跨语言调用 | 需要服务器推送的应用 |
+| 输入限制 | 支持处理`本地文件`或有效的`URL`资源 | 当部署在云端时，建议使用`URL`作为输入 | 当部署在云端时，建议使用`URL`作为输入 |
+
 
 ## 配置方式
 
@@ -188,8 +200,20 @@ MINIMAX_API_HOST=https://api.minimax.chat
 
 # 资源模式 (可选，默认为 'url')
 # 选项: 'url' (返回URL), 'local' (本地保存文件)
-MINIMAX_API_RESOURCE_MODE=url
+MINIMAX_RESOURCE_MODE=url
 ```
+
+## 配置优先级
+
+当使用多种配置方式时，将按照以下优先级顺序应用（从高到低）：
+
+1. **请求级配置**（通过每个API请求的`meta.auth`字段）
+2. **命令行参数**
+3. **环境变量**
+4. **配置文件**
+5. **默认值**
+
+这种优先级设计确保了在不同部署场景下的灵活性，同时为多租户环境提供了按请求配置的能力。
 
 ## 配置项说明
 
@@ -313,4 +337,4 @@ pnpm start
 
 ## 许可证
 
-MIT 
+MIT

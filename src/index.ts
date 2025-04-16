@@ -2,8 +2,9 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { z } from 'zod';
-import { Config } from './types/index.js';
+import { Config, ServerOptions, TransportMode } from './types/index.js';
 import { MiniMaxAPI } from './utils/api.js';
 import { TTSAPI } from './api/tts.js';
 import { ImageAPI } from './api/image.js';
@@ -11,6 +12,10 @@ import { VideoAPI } from './api/video.js';
 import { VoiceCloneAPI } from './api/voice-clone.js';
 import { VoiceAPI } from './api/voice.js';
 import { playAudio } from './utils/audio.js';
+import express from 'express';
+import cors from 'cors';
+import { RestServerTransport } from '@chatmcp/sdk/server/rest.js';
+import { getParamValue } from '@chatmcp/sdk/utils/index.js';
 import {
   DEFAULT_API_HOST,
   DEFAULT_BITRATE,
@@ -20,39 +25,70 @@ import {
   DEFAULT_LANGUAGE_BOOST,
   DEFAULT_PITCH,
   DEFAULT_SAMPLE_RATE,
+  DEFAULT_SERVER_ENDPOINT,
+  DEFAULT_SERVER_PORT,
   DEFAULT_SPEECH_MODEL,
   DEFAULT_SPEED,
   DEFAULT_T2I_MODEL,
   DEFAULT_T2V_MODEL,
+  DEFAULT_TRANSPORT_MODE,
   DEFAULT_VOICE_ID,
   DEFAULT_VOLUME,
   ENV_MINIMAX_API_HOST,
   ENV_MINIMAX_API_KEY,
   ENV_MINIMAX_MCP_BASE_PATH,
   ENV_RESOURCE_MODE,
+  ENV_SERVER_ENDPOINT,
+  ENV_SERVER_PORT,
+  ENV_TRANSPORT_MODE,
+  ENV_CONFIG_PATH,
   ERROR_API_HOST_REQUIRED,
   ERROR_API_KEY_REQUIRED,
   RESOURCE_MODE_URL,
+  TRANSPORT_MODE_REST,
+  TRANSPORT_MODE_SSE,
+  TRANSPORT_MODE_STDIO,
 } from './const/index.js';
+import fs from 'fs';
 
-// Initialize default configuration from environment variables
+// Get common parameters, prioritize using parameter values
+const apiKey = getParamValue('api_key') || process.env[ENV_MINIMAX_API_KEY] || '';
+const basePath = getParamValue('base_path') || process.env[ENV_MINIMAX_MCP_BASE_PATH];
+const apiHost = getParamValue('api_host') || process.env[ENV_MINIMAX_API_HOST] || DEFAULT_API_HOST;
+const resourceMode = getParamValue('resource_mode') || process.env[ENV_RESOURCE_MODE] || RESOURCE_MODE_URL;
+
+// Get server parameters, prioritize using parameter values
+const transportMode = getParamValue('mode') || process.env[ENV_TRANSPORT_MODE] || DEFAULT_TRANSPORT_MODE;
+const serverPort = getParamValue('port')
+  ? parseInt(getParamValue('port'), 10)
+  : process.env[ENV_SERVER_PORT]
+    ? parseInt(process.env[ENV_SERVER_PORT], 10)
+    : DEFAULT_SERVER_PORT;
+const serverEndpoint = getParamValue('endpoint') || process.env[ENV_SERVER_ENDPOINT] || DEFAULT_SERVER_ENDPOINT;
+
+// Initialize default configuration from parameters and environment variables
 const defaultConfig: Config = {
-  apiKey: process.env[ENV_MINIMAX_API_KEY] || '',
-  basePath: process.env[ENV_MINIMAX_MCP_BASE_PATH],
-  apiHost: process.env[ENV_MINIMAX_API_HOST] || DEFAULT_API_HOST,
-  resourceMode: process.env[ENV_RESOURCE_MODE] || RESOURCE_MODE_URL,
+  apiKey,
+  basePath,
+  apiHost,
+  resourceMode,
+  server: {
+    mode: transportMode as TransportMode,
+    port: serverPort,
+    endpoint: serverEndpoint,
+  },
 };
 
 // Helper function to extract configuration values from an object
 function getAuthValue(name: string, auth?: Record<string, any>, defaultValue: string = ''): string {
+  // Try to get value, handle different naming formats
   if (auth) {
-    // Try various naming formats to get values from the auth object
+    // Get value, support different naming formats
     const value = auth[name] || auth[name.toUpperCase()] || auth[name.toLowerCase()];
-
     if (value) return value;
   }
 
-  // Fall back to default value
+  // Return default value
   return defaultValue;
 }
 
@@ -112,15 +148,48 @@ server.tool(
       .optional()
       .describe('Path to save the generated audio file, automatically generated if not provided'),
   },
-  async (params) => {
+  async (args, extra) => {
     try {
-      // Try to update configuration from request parameters
-      updateConfigFromRequest(params);
+      // Build TTS request parameters
+      const ttsParams = {
+        text: args.text,
+        outputDirectory: args.outputDirectory,
+        voiceId: args.voiceId || DEFAULT_VOICE_ID,
+        model: args.model || DEFAULT_SPEECH_MODEL,
+        speed: args.speed || DEFAULT_SPEED,
+        vol: args.vol || DEFAULT_VOLUME,
+        pitch: args.pitch || DEFAULT_PITCH,
+        emotion: args.emotion || DEFAULT_EMOTION,
+        format: args.format || DEFAULT_FORMAT,
+        sampleRate: args.sampleRate || DEFAULT_SAMPLE_RATE,
+        bitrate: args.bitrate || DEFAULT_BITRATE,
+        channel: args.channel || DEFAULT_CHANNEL,
+        languageBoost: args.languageBoost || DEFAULT_LANGUAGE_BOOST,
+        outputFile: args.outputFile,
+      };
+
+      // Use global configuration
+      const requestApiKey = config.apiKey;
+
+      if (!requestApiKey) {
+        throw new Error(ERROR_API_KEY_REQUIRED);
+      }
+
+      // Update configuration with request-specific parameters
+      const requestConfig: Partial<Config> = {
+        apiKey: requestApiKey,
+        apiHost: config.apiHost,
+        resourceMode: config.resourceMode,
+      };
+
+      // Update API instance
+      const requestApi = new MiniMaxAPI(requestConfig as Config);
+      const requestTtsApi = new TTSAPI(requestApi);
 
       // Auto-set resource mode if not specified
-      const outputFormat = config.resourceMode;
+      const outputFormat = requestConfig.resourceMode;
       const ttsRequest = {
-        ...params,
+        ...ttsParams,
         outputFormat,
       };
 
@@ -130,7 +199,7 @@ server.tool(
         ttsRequest.outputFile = `tts_${textPrefix}_${Date.now()}`;
       }
 
-      const result = await ttsApi.generateSpeech(ttsRequest);
+      const result = await requestTtsApi.generateSpeech(ttsRequest);
 
       // Return different messages based on output format
       if (outputFormat === RESOURCE_MODE_URL) {
@@ -147,7 +216,7 @@ server.tool(
           content: [
             {
               type: 'text',
-              text: `Audio file saved: ${result}. Voice used: ${params.voiceId}`,
+              text: `Audio file saved: ${result}. Voice used: ${ttsParams.voiceId}`,
             },
           ],
         };
@@ -413,6 +482,8 @@ server.tool(
 function getConfigFromCommandLine(): Partial<Config> | undefined {
   const args = process.argv.slice(2);
   const config: Partial<Config> = {};
+  const serverConfig: Partial<ServerOptions> = {};
+  let hasServerConfig = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -425,7 +496,20 @@ function getConfigFromCommandLine(): Partial<Config> | undefined {
       config.basePath = args[++i];
     } else if (arg === '--resource-mode' && i + 1 < args.length) {
       config.resourceMode = args[++i];
+    } else if (arg === '--mode' && i + 1 < args.length) {
+      serverConfig.mode = args[++i] as any;
+      hasServerConfig = true;
+    } else if (arg === '--port' && i + 1 < args.length) {
+      serverConfig.port = parseInt(args[++i], 10);
+      hasServerConfig = true;
+    } else if (arg === '--endpoint' && i + 1 < args.length) {
+      serverConfig.endpoint = args[++i];
+      hasServerConfig = true;
     }
+  }
+
+  if (hasServerConfig) {
+    config.server = serverConfig;
   }
 
   return Object.keys(config).length > 0 ? config : undefined;
@@ -433,8 +517,24 @@ function getConfigFromCommandLine(): Partial<Config> | undefined {
 
 // Update configuration and recreate API instances
 function updateConfig(newConfig: Partial<Config>): void {
-  // Merge configurations, new configuration takes priority
-  config = { ...defaultConfig, ...newConfig };
+  // Merge server configuration
+  if (newConfig.server && config.server) {
+    // New configuration has higher priority and should override existing configuration
+    config.server = {
+      ...config.server, // Lower priority configuration loaded first
+      ...newConfig.server // Higher priority configuration loaded last
+    };
+    delete newConfig.server;
+  } else if (newConfig.server) {
+    config.server = newConfig.server;
+    delete newConfig.server;
+  }
+
+  // Merge other configurations, new configuration has higher priority
+  config = {
+    ...config, // Lower priority configuration loaded first
+    ...newConfig // Higher priority configuration loaded last
+  };
 
   // Update API instances
   api = new MiniMaxAPI(config);
@@ -445,29 +545,148 @@ function updateConfig(newConfig: Partial<Config>): void {
   voiceApi = new VoiceAPI(api);
 }
 
-// Start the server
-async function main() {
+// Read configuration from file
+function getConfigFromFile(): Partial<Config> | undefined {
   try {
-    // 1. Check command line arguments
+    // Prioritize getting configuration file path from parameters
+    const configPath = getParamValue("config_path") || process.env[ENV_CONFIG_PATH] || './minimax-config.json';
+
+    // Check if file exists
+    if (!fs.existsSync(configPath)) {
+      return undefined;
+    }
+
+    // Read and parse configuration file
+    const fileContent = fs.readFileSync(configPath, 'utf8');
+    const fileConfig = JSON.parse(fileContent) as Partial<Config>;
+
+    return fileConfig;
+  } catch (error) {
+    console.warn(`Failed to read config file: ${error instanceof Error ? error.message : String(error)}`);
+    return undefined;
+  }
+}
+
+// Start REST server
+async function startRestServer() {
+  try {
+    // Use REST server implementation
+    const port = config.server?.port || DEFAULT_SERVER_PORT;
+    const endpoint = config.server?.endpoint || DEFAULT_SERVER_ENDPOINT;
+
+    console.log(`Starting REST server on port ${port} with endpoint ${endpoint}`);
+
+    const transport = new RestServerTransport({
+      port,
+      endpoint,
+    });
+
+    await server.connect(transport);
+    await transport.startServer();
+
+    console.log(`MiniMax MCP Server running on REST with port ${port} and endpoint ${endpoint}`);
+  } catch (error) {
+    console.error(`Failed to start REST server: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+// Start SSE server
+async function startSSEServer() {
+  try {
+    // Use SSE implementation from @modelcontextprotocol/sdk
+    const app = express();
+    const port = config.server?.port || DEFAULT_SERVER_PORT;
+    const endpoint = config.server?.endpoint || DEFAULT_SERVER_ENDPOINT;
+
+    // Configure CORS and JSON parsing
+    app.use(cors());
+    app.use(express.json());
+
+    let transport: any = null;
+
+    // Configure SSE route
+    app.get('/sse', (req: any, res: any) => {
+      console.log('New SSE connection');
+      transport = new SSEServerTransport(endpoint, res);
+      server.connect(transport);
+    });
+
+    // Configure message handling route
+    app.post(endpoint, (req: any, res: any) => {
+      if (transport) {
+        transport.handlePostMessage(req, res);
+      } else {
+        res.status(400).json({ error: 'No SSE connection established' });
+      }
+    });
+
+    // Start Express server
+    app.listen(port, () => {
+      console.log(`MiniMax MCP Server running on SSE with port ${port}`);
+    });
+  } catch (error) {
+    console.error(`Failed to start SSE server: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+// Start the server
+async function runServer() {
+  try {
+    // Configuration priority from high to low:
+    // 1. Request-level configuration (meta.auth parameters) - handled during API calls
+    // 2. Command line arguments
+    // 3. Environment variables
+    // 4. Configuration file
+    // 5. Default values
+    
+    // Environment variables and default values have already been loaded during default configuration initialization
+    
+    // Get configuration from configuration file (lower priority than environment variables)
+    const fileConfig = getConfigFromFile();
+    if (fileConfig) {
+      // Note: Since environment variables have already been loaded into config during initialization,
+      // special handling is needed here to avoid configuration file overriding environment variable settings
+      const configWithEnv = { ...fileConfig };
+      
+      // If environment variables are set, don't use corresponding settings from configuration file
+      if (process.env[ENV_MINIMAX_API_KEY]) {
+        delete configWithEnv.apiKey;
+      }
+      if (process.env[ENV_MINIMAX_API_HOST]) {
+        delete configWithEnv.apiHost;
+      }
+      if (process.env[ENV_MINIMAX_MCP_BASE_PATH]) {
+        delete configWithEnv.basePath;
+      }
+      if (process.env[ENV_RESOURCE_MODE]) {
+        delete configWithEnv.resourceMode;
+      }
+      if (configWithEnv.server) {
+        if (process.env[ENV_TRANSPORT_MODE]) {
+          delete configWithEnv.server.mode;
+        }
+        if (process.env[ENV_SERVER_PORT]) {
+          delete configWithEnv.server.port;
+        }
+        if (process.env[ENV_SERVER_ENDPOINT]) {
+          delete configWithEnv.server.endpoint;
+        }
+      }
+      
+      // Apply filtered configuration file settings
+      updateConfig(configWithEnv);
+    }
+    
+    // Get configuration from command line (higher priority than configuration file and environment variables)
     const cmdConfig = getConfigFromCommandLine();
     if (cmdConfig) {
       updateConfig(cmdConfig);
     }
-
-    // 2. Check configuration file (if exists)
-    try {
-      const configPath = process.env.MINIMAX_CONFIG_PATH || './minimax-config.json';
-      const fs = await import('fs');
-      if (fs.existsSync(configPath)) {
-        const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        if (configData && typeof configData === 'object') {
-          updateConfig(configData);
-        }
-      }
-    } catch (err) {
-      // Configuration file doesn't exist or is incorrectly formatted, ignore error
-    }
-
+    
+    // Request-level configuration is dynamically loaded during each request processing (highest priority)
+    
     // Validate necessary configuration
     if (!config.apiKey) {
       throw new Error(ERROR_API_KEY_REQUIRED);
@@ -477,9 +696,68 @@ async function main() {
       throw new Error(ERROR_API_HOST_REQUIRED);
     }
 
-    // Start the server
+    // Check mode parameter
+    const mode = config.server?.mode || DEFAULT_TRANSPORT_MODE;
+
+    // If REST mode, use RESTServerTransport
+    if (mode === TRANSPORT_MODE_REST) {
+      const port = config.server?.port || DEFAULT_SERVER_PORT;
+      const endpoint = config.server?.endpoint || DEFAULT_SERVER_ENDPOINT;
+
+      console.log(`Starting REST server on port ${port} with endpoint ${endpoint}`);
+
+      const transport = new RestServerTransport({
+        port,
+        endpoint,
+      });
+
+      await server.connect(transport);
+      await transport.startServer();
+
+      console.log(`MiniMax MCP Server running on REST with port ${port} and endpoint ${endpoint}`);
+      return;
+    }
+
+    // If SSE mode
+    if (mode === TRANSPORT_MODE_SSE) {
+      const app = express();
+      const port = config.server?.port || DEFAULT_SERVER_PORT;
+      const endpoint = config.server?.endpoint || DEFAULT_SERVER_ENDPOINT;
+
+      // Configure CORS and JSON parsing
+      app.use(cors());
+      app.use(express.json());
+
+      let transport: any = null;
+
+      // Configure SSE route
+      app.get('/sse', (req: any, res: any) => {
+        console.log('New SSE connection');
+        transport = new SSEServerTransport(endpoint, res);
+        server.connect(transport);
+      });
+
+      // Configure message handling route
+      app.post(endpoint, (req: any, res: any) => {
+        if (transport) {
+          transport.handlePostMessage(req, res);
+        } else {
+          res.status(400).json({ error: 'No SSE connection established' });
+        }
+      });
+
+      // Start Express server
+      app.listen(port, () => {
+        console.log(`MiniMax MCP Server running on SSE with port ${port}`);
+      });
+      return;
+    }
+
+    // Default to stdio mode
+    console.log('Starting stdio server');
     const transport = new StdioServerTransport();
     await server.connect(transport);
+    console.log('MiniMax MCP Server running on stdio');
   } catch (error) {
     console.error(`Failed to start server: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
@@ -495,11 +773,11 @@ export async function startMiniMaxMCP(customConfig?: Partial<Config>): Promise<v
   if (customConfig) {
     updateConfig(customConfig);
   }
-  return main();
+  return runServer();
 }
 
 // Run script directly
-main().catch((error) => {
+runServer().catch((error) => {
   process.stderr.write(`Fatal error in main function: ${error}\n`);
   process.exit(1);
 });
@@ -513,6 +791,8 @@ export {
   VoiceCloneRequest,
   ListVoicesRequest,
   PlayAudioRequest,
+  ServerOptions,
+  TransportMode,
 } from './types/index.js';
 export { MiniMaxAPI } from './utils/api.js';
 export { TTSAPI } from './api/tts.js';
@@ -532,13 +812,27 @@ function getConfigFromRequest(request: any): Partial<Config> | undefined {
     return undefined;
   }
 
+  // Build configuration object including server settings
+  const serverConfig: Partial<ServerOptions> = {
+    mode: (getAuthValue('transport_mode', auth) || getAuthValue('transportMode', auth)) as TransportMode | undefined,
+    port: getAuthValue('port', auth) ? parseInt(getAuthValue('port', auth), 10) : undefined,
+    endpoint: getAuthValue('endpoint', auth),
+  };
+
   // Build configuration object
-  return {
+  const config: Partial<Config> = {
     apiKey: getAuthValue('api_key', auth) || getAuthValue('apiKey', auth),
     basePath: getAuthValue('base_path', auth) || getAuthValue('basePath', auth),
     apiHost: getAuthValue('api_host', auth) || getAuthValue('apiHost', auth),
     resourceMode: getAuthValue('resource_mode', auth) || getAuthValue('resourceMode', auth),
   };
+
+  // Only add server configuration when at least one server config value exists
+  if (serverConfig.mode || serverConfig.port || serverConfig.endpoint) {
+    config.server = serverConfig;
+  }
+
+  return Object.keys(config).length > 0 ? config : undefined;
 }
 
 // Update configuration from request
@@ -546,21 +840,9 @@ function updateConfigFromRequest(params: any): void {
   // In MCP tools, request parameters are passed directly as the first argument
   // Try to get configuration from params.meta.auth
   if (params?.meta?.auth) {
-    const requestConfig = {
-      apiKey: getAuthValue('api_key', params.meta.auth) || getAuthValue('apiKey', params.meta.auth),
-      basePath: getAuthValue('base_path', params.meta.auth) || getAuthValue('basePath', params.meta.auth),
-      apiHost: getAuthValue('api_host', params.meta.auth) || getAuthValue('apiHost', params.meta.auth),
-      resourceMode: getAuthValue('resource_mode', params.meta.auth) || getAuthValue('resourceMode', params.meta.auth),
-    };
-
-    // Merge configurations, request configuration takes priority
-    config = { ...defaultConfig, ...requestConfig };
-    // Update API instances
-    api = new MiniMaxAPI(config);
-    ttsApi = new TTSAPI(api);
-    imageApi = new ImageAPI(api);
-    videoApi = new VideoAPI(api);
-    voiceCloneApi = new VoiceCloneAPI(api);
-    voiceApi = new VoiceAPI(api);
+    const requestConfig = getConfigFromRequest({ params });
+    if (requestConfig) {
+      updateConfig(requestConfig);
+    }
   }
 }

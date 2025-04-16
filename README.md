@@ -53,7 +53,7 @@ JavaScript/TypeScript implementation of MiniMax MCP, providing image generation,
 - Video Generation
 - Voice Cloning
 - Dynamic configuration (supports both environment variables and request parameters)
-- Compatible with MCP platform hosting (ModelScope, MCP SO, etc.)
+- Compatible with MCP platform hosting (ModelScope and other MCP platforms)
 
 ## Installation
 
@@ -94,10 +94,10 @@ Go to `Claude > Settings > Developer > Edit Config > claude_desktop_config.json`
         "minimax-mcp-js"
       ],
       "env": {
+        "MINIMAX_API_HOST": "https://api.minimaxi.chat",
         "MINIMAX_API_KEY": "<your-api-key-here>",
         "MINIMAX_MCP_BASE_PATH": "<local-output-dir-path>",
-        "MINIMAX_API_HOST": "https://api.minimaxi.chat",
-        "MINIMAX_API_RESOURCE_MODE": "url"
+        "MINIMAX_RESOURCE_MODE": "url"
       }
     }
   }
@@ -124,6 +124,17 @@ Then configure Claude Desktop or Cursor to use npx as shown above. This will aut
 ⚠️ **Note**: The API key needs to match the host address. Different hosts are used for global and mainland China versions:
 - Global Host: `https://api.minimaxi.chat` (note the extra "i")
 - Mainland China Host: `https://api.minimaxi.chat`
+
+## Transport Modes
+
+MiniMax MCP JS supports three transport modes:
+
+| Feature | stdio (default) | REST | SSE |
+|:-----|:-----|:-----|:-----|
+| Environment | Local only | Local or cloud deployment | Local or cloud deployment |
+| Communication | Via `standard I/O` | Via `HTTP requests` | Via `server-sent events` |
+| Use Cases | Local MCP client integration | API services, cross-language calls | Applications requiring server push |
+| Input Restrictions | Supports `local files` or `URL` resources | When deployed in cloud, `URL` input recommended | When deployed in cloud, `URL` input recommended |
 
 ## Configuration
 
@@ -189,8 +200,20 @@ MINIMAX_API_HOST=https://api.minimaxi.chat
 
 # Resource mode (optional, defaults to 'url')
 # Options: 'url' (return URLs), 'local' (save files locally)
-MINIMAX_API_RESOURCE_MODE=url
+MINIMAX_RESOURCE_MODE=url
 ```
+
+### Configuration Priority
+
+When multiple configuration methods are used, the following priority order applies (from highest to lowest):
+
+1. **Request-level configuration** (via `meta.auth` in each API request)
+2. **Command line arguments**
+3. **Environment variables**
+4. **Configuration file**
+5. **Default values**
+
+This prioritization ensures flexibility across different deployment scenarios while maintaining per-request configuration capabilities for multi-tenant environments.
 
 ### Configuration Parameters
 

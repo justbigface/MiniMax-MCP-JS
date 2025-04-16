@@ -60,9 +60,18 @@ export interface PlayAudioRequest {
   isUrl?: boolean;
 }
 
+export type TransportMode = 'stdio' | 'rest' | 'sse';
+
+export interface ServerOptions {
+  port?: number;
+  endpoint?: string;
+  mode?: TransportMode;
+}
+
 export interface Config {
   apiKey: string;
   basePath?: string;
   apiHost?: string;
   resourceMode?: string;
+  server?: ServerOptions;
 } 
