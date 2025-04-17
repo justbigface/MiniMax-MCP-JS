@@ -101,10 +101,10 @@ Go to `Claude > Settings > Developer > Edit Config > claude_desktop_config.json`
         "minimax-mcp-js"
       ],
       "env": {
-        "MINIMAX_API_HOST": "https://api.minimaxi.chat",
+        "MINIMAX_API_HOST": "<host url, Global Host https://api.minimaxi.chat, Mainland Host ​https://api.minimax.chat>",
         "MINIMAX_API_KEY": "<your-api-key-here>",
-        "MINIMAX_MCP_BASE_PATH": "<local-output-dir-path>",
-        "MINIMAX_RESOURCE_MODE": "url"
+        "MINIMAX_MCP_BASE_PATH": "<local-output-dir-path, such as /User/xxx/Desktop>",
+        "MINIMAX_RESOURCE_MODE": "<optional, [url|local], url is default, audio/image/video are downloaded locally or provided in URL format>"
       }
     }
   }
