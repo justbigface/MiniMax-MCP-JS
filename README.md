@@ -252,6 +252,8 @@ This prioritization ensures flexibility across different deployment scenarios wh
 
 Convert text to speech audio file.
 
+Tool Name: `text_to_audio`
+
 Parameters:
 - `text`: Text to convert (required)
 - `model`: Model version, options are 'speech-02-hd', 'speech-02-turbo', 'speech-01-hd', 'speech-01-turbo', 'speech-01-240228', 'speech-01-turbo-240228', default is 'speech-02-hd'
@@ -276,6 +278,8 @@ Parameters:
 
 Generate images based on text prompts.
 
+Tool Name: `text_to_image`
+
 Parameters:
 - `prompt`: Image description (required)
 - `model`: Model version, default is 'image-01'
@@ -290,6 +294,8 @@ Parameters:
 
 Generate videos based on text prompts.
 
+Tool Name: `generate_video`
+
 Parameters:
 - `prompt`: Video description (required)
 - `model`: Model version, options are 'T2V-01', 'T2V-01-Director', 'I2V-01', 'I2V-01-Director', 'I2V-01-live', 'S2V-01', default is 'T2V-01'
@@ -300,6 +306,8 @@ Parameters:
 ### Voice Clone
 
 Clone a voice from an audio file.
+
+Tool Name: `voice_clone`
 
 Parameters:
 - `audioFile`: Path to audio file (required)
