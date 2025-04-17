@@ -70,6 +70,13 @@ MiniMax MCP JS implements the [Model Context Protocol (MCP)](https://github.com/
 
 1. Get your API key from [MiniMax International Platform](https://www.minimax.io/platform/user-center/basic-information/interface-key).
 2. Install [minimax-mcp-js](https://www.npmjs.com/package/minimax-mcp-js) using pnpm: `pnpm add minimax-mcp-js`
+3. **Important: API HOST&KEY are different in different region**, they must match, otherwise you will receive an `Invalid API key` error.
+
+|Region| Global  | Mainland  |
+|:--|:-----|:-----|
+|MINIMAX_API_KEY| go get from [MiniMax Global](https://www.minimax.io/platform/user-center/basic-information/interface-key) | go get from [MiniMax](https://platform.minimaxi.com/user-center/basic-information/interface-key) |
+|MINIMAX_API_HOST| ​https://api.minimaxi.chat (note the extra **"i"**) | ​https://api.minimax.chat |
+
 
 ### Using with MCP Clients (Recommended)
 

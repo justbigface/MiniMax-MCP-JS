@@ -1,6 +1,6 @@
 {
   "name": "minimax-mcp-js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Official MiniMax Model Context Protocol (MCP) JavaScript implementation that provides seamless integration with MiniMax's powerful AI capabilities including image generation, video generation, text-to-speech, and voice cloning APIs.",
   "main": "build/index.js",
   "type": "module",
@@ -14,7 +14,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "prettier --check \"src/**/*.ts\"",
     "prepare": "pnpm run build",
-    "pretest": "pnpm run build"
+    "pretest": "pnpm run build",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "keywords": [
     "mcp",

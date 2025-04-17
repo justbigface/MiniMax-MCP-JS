@@ -70,6 +70,12 @@ MiniMax MCP JS 实现了 [Model Context Protocol (MCP)](https://github.com/anthr
 
 1. 从[MiniMax国内开放平台](https://platform.minimaxi.com/user-center/basic-information/interface-key)或[MiniMax国际开放平台](https://www.minimax.io/platform/user-center/basic-information/interface-key)获取您的 API 密钥。
 2. 使用 pnpm 安装包：`pnpm add minimax-mcp-js`
+3. **重要提示: API的服务器地址和密钥在不同区域有所不同**，两者需要匹配，否则会有 `invalid api key` 的错误
+
+|地区| 国际  | 国内  |
+|:--|:-----|:-----|
+|MINIMAX_API_KEY| 获取密钥 [MiniMax国际版](https://www.minimax.io/platform/user-center/basic-information/interface-key) | 获取密钥 [MiniMax](https://platform.minimaxi.com/user-center/basic-information/interface-key) |
+|MINIMAX_API_HOST| ​https://api.minimaxi.chat （请注意额外的 **"i"** 字母） | ​https://api.minimax.chat |
 
 ### 通过 MCP 客户端使用（推荐）
 

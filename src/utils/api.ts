@@ -159,10 +159,10 @@ export class MiniMaxAPI {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
         const errorMessage = axiosError.response?.data &&
-                           typeof axiosError.response.data === 'object' &&
-                           'message' in axiosError.response.data
-                           ? (axiosError.response.data as any).message
-                           : axiosError.message;
+          typeof axiosError.response.data === 'object' &&
+          'message' in axiosError.response.data
+          ? (axiosError.response.data as any).message
+          : axiosError.message;
         throw new MinimaxRequestError(`File download failed: ${errorMessage}`);
       }
       throw new MinimaxRequestError(`File download failed: ${String(error)}`);
