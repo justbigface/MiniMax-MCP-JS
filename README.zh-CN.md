@@ -253,6 +253,8 @@ MINIMAX_RESOURCE_MODE=url
 
 将文本转换为语音文件。
 
+工具名称：`text_to_audio`
+
 参数：
 - `text`: 要转换的文本 (必需)
 - `model`: 模型版本，选项为 'speech-02-hd', 'speech-02-turbo', 'speech-01-hd', 'speech-01-turbo', 'speech-01-240228', 'speech-01-turbo-240228'，默认为 'speech-02-hd'
@@ -277,6 +279,8 @@ MINIMAX_RESOURCE_MODE=url
 
 根据文本提示生成图像。
 
+工具名称：`text_to_image`
+
 参数：
 - `prompt`: 图像描述 (必需)
 - `model`: 模型版本，默认为 'image-01'
@@ -291,6 +295,8 @@ MINIMAX_RESOURCE_MODE=url
 
 根据文本提示生成视频。
 
+工具名称：`generate_video`
+
 参数：
 - `prompt`: 视频描述 (必需)
 - `model`: 模型版本，选项为 'T2V-01', 'T2V-01-Director', 'I2V-01', 'I2V-01-Director', 'I2V-01-live', 'S2V-01'，默认为 'T2V-01'
@@ -301,6 +307,8 @@ MINIMAX_RESOURCE_MODE=url
 ### 语音克隆
 
 从音频文件克隆语音。
+
+工具名称：`voice_clone`
 
 参数：
 - `audioFile`: 音频文件路径 (必需)
