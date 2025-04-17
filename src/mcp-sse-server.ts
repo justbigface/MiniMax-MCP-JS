@@ -122,7 +122,7 @@ export class MCPSSEServer {
       };
     }
 
-    console.log(`[${new Date().toISOString()}] SSE server configuration initialized`);
+    // console.log(`[${new Date().toISOString()}] SSE server configuration initialized`);
   }
 
   /**
@@ -146,7 +146,7 @@ export class MCPSSEServer {
     this.voiceCloneApi = new VoiceCloneAPI(this.api);
     this.voiceApi = new VoiceAPI(this.api);
 
-    console.log(`[${new Date().toISOString()}] SSE server configuration updated`);
+    // console.log(`[${new Date().toISOString()}] SSE server configuration updated`);
   }
 
   /**
@@ -660,7 +660,7 @@ export class MCPSSEServer {
         const transport = new SSEServerTransport(endpoint, res);
         const sessionId = transport.sessionId || `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-        console.log(`[${new Date().toISOString()}] New SSE connection established: ${sessionId}`);
+        // console.log(`[${new Date().toISOString()}] New SSE connection established: ${sessionId}`);
 
           // Set response headers to prevent connection timeout
           res.setHeader('Content-Type', 'text/event-stream');
@@ -671,9 +671,9 @@ export class MCPSSEServer {
           const heartbeatInterval = setInterval(() => {
             try {
               res.write(`event: heartbeat\ndata: ${Date.now()}\n\n`);
-              console.log(`[${new Date().toISOString()}] Heartbeat sent: ${sessionId}`);
+              // console.log(`[${new Date().toISOString()}] Heartbeat sent: ${sessionId}`);
             } catch (error) {
-              console.error(`[${new Date().toISOString()}] Failed to send heartbeat: ${sessionId}`, error);
+              // console.error(`[${new Date().toISOString()}] Failed to send heartbeat: ${sessionId}`, error);
               this.closeConnection(sessionId);
             }
           }, HEARTBEAT_INTERVAL);
@@ -687,19 +687,19 @@ export class MCPSSEServer {
 
         // Handle connection close
         req.on('close', () => {
-          console.log(`[${new Date().toISOString()}] SSE connection closed: ${sessionId}`);
+          // console.log(`[${new Date().toISOString()}] SSE connection closed: ${sessionId}`);
             this.closeConnection(sessionId);
         });
 
         // Connect to MCP server
         await this.mcpServer.connect(transport);
-        console.log(`[${new Date().toISOString()}] MCP server connection successful: ${sessionId}`);
+        // console.log(`[${new Date().toISOString()}] MCP server connection successful: ${sessionId}`);
 
           // Send initial connection confirmation event
           res.write(`event: connected\ndata: {"sessionId":"${sessionId}","timestamp":${Date.now()}}\n\n`);
 
         } catch (error) {
-          console.error(`[${new Date().toISOString()}] Failed to establish SSE connection:`, error);
+          // console.error(`[${new Date().toISOString()}] Failed to establish SSE connection:`, error);
           res.status(500).end();
         }
       });
@@ -707,7 +707,7 @@ export class MCPSSEServer {
       // Configure message handling route
       app.post(endpoint, async (req, res) => {
         try {
-          console.log(`[${new Date().toISOString()}] Received client message:`, req.query);
+          // console.log(`[${new Date().toISOString()}] Received client message:`, req.query);
           const sessionId = req.query.sessionId as string;
 
           if (sessionId && this.connections.has(sessionId)) {
@@ -727,7 +727,7 @@ export class MCPSSEServer {
           if (this.connections.size > 0) {
             // Use the first available connection (simple implementation)
             const [firstSessionId, connectionInfo] = [...this.connections.entries()][0];
-            console.log(`[${new Date().toISOString()}] No session ID specified, using first available connection: ${firstSessionId}`);
+            // console.log(`[${new Date().toISOString()}] No session ID specified, using first available connection: ${firstSessionId}`);
 
             // Update last activity time
             connectionInfo.lastActivityTime = Date.now();
@@ -738,7 +738,7 @@ export class MCPSSEServer {
             throw new Error('No active SSE connections');
           }
         } catch (error) {
-          console.error(`[${new Date().toISOString()}] Failed to handle client message:`, error);
+          // console.error(`[${new Date().toISOString()}] Failed to handle client message:`, error);
           res.status(500).json({
             error: 'Failed to process message',
             message: error instanceof Error ? error.message : String(error),
@@ -749,7 +749,7 @@ export class MCPSSEServer {
 
       // Error handling middleware
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-        console.error(`[${new Date().toISOString()}] Unhandled exception:`, err);
+        // console.error(`[${new Date().toISOString()}] Unhandled exception:`, err);
         res.status(500).json({
           error: 'Internal server error',
           message: err.message,
@@ -760,9 +760,9 @@ export class MCPSSEServer {
       // Start Express server
       return new Promise((resolve) => {
         this.server = app.listen(port, () => {
-          console.log(`[${new Date().toISOString()}] MiniMax MCP SSE server started at: http://localhost:${port}`);
-          console.log(`- SSE connection endpoint: http://localhost:${port}/sse`);
-          console.log(`- Message handling endpoint: http://localhost:${port}${endpoint}`);
+          // console.log(`[${new Date().toISOString()}] MiniMax MCP SSE server started at: http://localhost:${port}`);
+          // console.log(`- SSE connection endpoint: http://localhost:${port}/sse`);
+          // console.log(`- Message handling endpoint: http://localhost:${port}${endpoint}`);
 
           // Set up process signal handlers
           this.setupSignalHandlers();
@@ -774,7 +774,7 @@ export class MCPSSEServer {
         });
       });
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to start SSE server:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to start SSE server:`, error);
       throw error;
     }
   }
@@ -787,7 +787,7 @@ export class MCPSSEServer {
       await transport.handlePostMessage(req, res);
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to handle message, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS}):`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to handle message, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS}):`, error);
         // Exponential backoff retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleClientMessage(transport, req, res, attempt + 1);
@@ -805,13 +805,13 @@ export class MCPSSEServer {
       const now = Date.now();
       const inactiveThreshold = 5 * 60 * 1000; // 5 minutes of inactivity is considered timeout
 
-      console.log(`[${new Date().toISOString()}] Performing connection monitoring: ${this.connections.size} active connections`);
+      // console.log(`[${new Date().toISOString()}] Performing connection monitoring: ${this.connections.size} active connections`);
 
       for (const [sessionId, connectionInfo] of this.connections.entries()) {
         const inactiveDuration = now - connectionInfo.lastActivityTime;
 
         if (inactiveDuration > inactiveThreshold) {
-          console.warn(`[${new Date().toISOString()}] Detected inactive connection ${sessionId}, timed out after ${Math.round(inactiveDuration / 1000)} seconds, closing...`);
+          // console.warn(`[${new Date().toISOString()}] Detected inactive connection ${sessionId}, timed out after ${Math.round(inactiveDuration / 1000)} seconds, closing...`);
           this.closeConnection(sessionId);
         }
       }
@@ -840,12 +840,12 @@ export class MCPSSEServer {
           res.end();
         }
       } catch (error) {
-        console.error(`[${new Date().toISOString()}] Failed to send close event: ${sessionId}`, error);
+        // console.error(`[${new Date().toISOString()}] Failed to send close event: ${sessionId}`, error);
       }
 
-      console.log(`[${new Date().toISOString()}] Connection closed: ${sessionId}`);
+      // console.log(`[${new Date().toISOString()}] Connection closed: ${sessionId}`);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Error closing connection: ${sessionId}`, error);
+      // console.error(`[${new Date().toISOString()}] Error closing connection: ${sessionId}`, error);
     } finally {
       // Always remove the connection from the Map
       this.connections.delete(sessionId);
@@ -857,17 +857,17 @@ export class MCPSSEServer {
    */
   private setupSignalHandlers(): void {
     process.on('SIGTERM', async () => {
-      console.log(`[${new Date().toISOString()}] 接收到SIGTERM信号，准备关闭`);
+      // console.log(`[${new Date().toISOString()}] 接收到SIGTERM信号，准备关闭`);
       await this.closeAllConnections();
       this.stopConnectionMonitoring();
       this.server.close(() => {
-        console.log(`[${new Date().toISOString()}] 服务器已关闭`);
+        // console.log(`[${new Date().toISOString()}] 服务器已关闭`);
         process.exit(0);
       });
     });
 
     process.on('SIGINT', async () => {
-      console.log(`[${new Date().toISOString()}] 接收到SIGINT信号，准备关闭`);
+      // console.log(`[${new Date().toISOString()}] 接收到SIGINT信号，准备关闭`);
       await this.closeAllConnections();
       this.stopConnectionMonitoring();
       if (this.server) {
@@ -890,7 +890,7 @@ export class MCPSSEServer {
    * Close all SSE connections
    */
   private async closeAllConnections(): Promise<void> {
-    console.log(`[${new Date().toISOString()}] Closing all connections (${this.connections.size})`);
+    // console.log(`[${new Date().toISOString()}] Closing all connections (${this.connections.size})`);
 
     // Get all session IDs
     const sessionIds = [...this.connections.keys()];
@@ -898,16 +898,16 @@ export class MCPSSEServer {
     // Close each connection sequentially
     for (const sessionId of sessionIds) {
       try {
-        console.log(`[${new Date().toISOString()}] Attempting to close connection: ${sessionId}`);
+        // console.log(`[${new Date().toISOString()}] Attempting to close connection: ${sessionId}`);
         this.closeConnection(sessionId);
       } catch (error) {
-        console.error(`[${new Date().toISOString()}] Failed to close connection: ${sessionId}`, error);
+        // console.error(`[${new Date().toISOString()}] Failed to close connection: ${sessionId}`, error);
       }
     }
 
     // Ensure connections map is empty
     this.connections.clear();
-    console.log(`[${new Date().toISOString()}] All connections closed`);
+    // console.log(`[${new Date().toISOString()}] All connections closed`);
   }
 
   /**

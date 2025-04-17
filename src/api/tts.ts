@@ -150,7 +150,7 @@ export class TTSAPI {
         return (Math.abs(curr - sampleRate) < Math.abs(prev - sampleRate)) ? curr : prev;
       });
 
-      console.error(`Warning: Provided sample rate ${sampleRate} is invalid, using closest valid value ${closest}`);
+      // console.error(`Warning: Provided sample rate ${sampleRate} is invalid, using closest valid value ${closest}`);
       return closest;
     }
 
@@ -174,7 +174,7 @@ export class TTSAPI {
         return (Math.abs(curr - bitrate) < Math.abs(prev - bitrate)) ? curr : prev;
       });
 
-      console.error(`Warning: Provided bitrate ${bitrate} is invalid, using closest valid value ${closest}`);
+      // console.error(`Warning: Provided bitrate ${bitrate} is invalid, using closest valid value ${closest}`);
       return closest;
     }
 
@@ -198,7 +198,7 @@ export class TTSAPI {
         return (Math.abs(curr - channel) < Math.abs(prev - channel)) ? curr : prev;
       });
 
-      console.error(`Warning: Provided channel ${channel} is invalid, using closest valid value ${closest}`);
+      // console.error(`Warning: Provided channel ${channel} is invalid, using closest valid value ${closest}`);
       return closest;
     }
 
@@ -217,7 +217,7 @@ export class TTSAPI {
 
     // If the provided model is not within the valid range, use default value
     if (!validModels.includes(model)) {
-      console.error(`Warning: Provided model ${model} is invalid, using default value speech-02-hd`);
+      // console.error(`Warning: Provided model ${model} is invalid, using default value speech-02-hd`);
       return 'speech-02-hd';
     }
 
@@ -236,7 +236,7 @@ export class TTSAPI {
 
     // If the provided format is not within the valid range, use default value
     if (!validFormats.includes(format)) {
-      console.error(`Warning: Provided format ${format} is invalid, using default value mp3`);
+      // console.error(`Warning: Provided format ${format} is invalid, using default value mp3`);
       return 'mp3';
     }
 
@@ -247,10 +247,10 @@ export class TTSAPI {
   private ensureValidEmotion(emotion?: string, model?: string): string | undefined {
     // List of valid emotions supported by MiniMax API
     const validEmotions = ['happy', 'sad', 'angry', 'fearful', 'disgusted', 'surprised', 'neutral'];
-    
+
     // List of models that support emotion parameter
     const emotionSupportedModels = ['speech-02-hd', 'speech-02-turbo', 'speech-01-turbo', 'speech-01-hd'];
-    
+
     // Check if the model supports emotion
     if (model && !emotionSupportedModels.includes(model)) {
       return undefined; // Return undefined to remove the emotion parameter for unsupported models
@@ -263,7 +263,7 @@ export class TTSAPI {
 
     // If the provided emotion is not within the valid range, use default value
     if (!validEmotions.includes(emotion)) {
-      console.error(`Warning: Provided emotion ${emotion} is invalid, using default value happy`);
+      // console.error(`Warning: Provided emotion ${emotion} is invalid, using default value happy`);
       return 'happy';
     }
 

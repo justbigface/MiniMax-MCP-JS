@@ -64,7 +64,7 @@ export class MediaService extends BaseService {
     try {
       return await this.ttsApi.generateSpeech(params);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to generate speech:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to generate speech:`, error);
       throw this.wrapError('Failed to generate speech', error);
     }
   }
@@ -79,7 +79,7 @@ export class MediaService extends BaseService {
     try {
       return await this.voiceApi.listVoices(params);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to get voice list:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to get voice list:`, error);
       throw this.wrapError('Failed to get voice list', error);
     }
   }
@@ -94,7 +94,7 @@ export class MediaService extends BaseService {
     try {
       return await this.voiceCloneApi.cloneVoice(params);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to clone voice:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to clone voice:`, error);
       throw this.wrapError('Failed to clone voice', error);
     }
   }
@@ -116,7 +116,7 @@ export class MediaService extends BaseService {
       const outputFiles = await this.imageApi.generateImage(params);
       return outputFiles;
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to generate image:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to generate image:`, error);
       throw this.wrapError('Failed to generate image', error);
     }
   }
@@ -137,7 +137,7 @@ export class MediaService extends BaseService {
 
       return await this.videoApi.generateVideo(params);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to generate video:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to generate video:`, error);
       throw this.wrapError('Failed to generate video', error);
     }
   }
@@ -208,4 +208,4 @@ export class MediaService extends BaseService {
     }
     return new Error(`${message}: ${String(error)}`);
   }
-} 
+}

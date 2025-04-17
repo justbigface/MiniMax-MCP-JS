@@ -91,7 +91,7 @@ export class MCPServer {
     // STDIO mode doesn't need port and endpoint configuration
     delete this.config.server;
 
-    console.log(`[${new Date().toISOString()}] STDIO server configuration initialized`);
+    // console.log(`[${new Date().toISOString()}] STDIO server configuration initialized`);
   }
 
   /**
@@ -627,7 +627,7 @@ export class MCPServer {
       const fileContent = fs.readFileSync(configPath, 'utf8');
       return JSON.parse(fileContent) as Partial<Config>;
     } catch (error) {
-      console.warn(`Failed to read config file: ${error instanceof Error ? error.message : String(error)}`);
+      // console.warn(`Failed to read config file: ${error instanceof Error ? error.message : String(error)}`);
       return undefined;
     }
   }
@@ -650,7 +650,7 @@ export class MCPServer {
       // Start STDIO server
       return this.startStdioServer();
     } catch (error) {
-      console.error(`Failed to start server: ${error instanceof Error ? error.message : String(error)}`);
+      // console.error(`Failed to start server: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -659,10 +659,10 @@ export class MCPServer {
    * Start standard input/output server
    */
   public async startStdioServer(): Promise<void> {
-    console.log('Starting stdio server');
+    // console.log('Starting stdio server');
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.log('MiniMax MCP Server running on stdio');
+    // console.log('MiniMax MCP Server running on stdio');
   }
 
   /**

@@ -23,7 +23,7 @@ export class VideoAPI {
     try {
       // Ensure model is valid
       const model = this.ensureValidModel(request.model);
-      
+
       // Prepare request data
       const requestData: Record<string, any> = {
         model: model,
@@ -125,20 +125,20 @@ export class VideoAPI {
       throw new MinimaxRequestError(`Unexpected error occurred during video generation: ${String(error)}`);
     }
   }
-  
+
   // Helper function: Ensure model is valid
   private ensureValidModel(model?: string): string {
     // If no model provided, use default
     if (!model) {
       return DEFAULT_T2V_MODEL;
     }
-    
+
     // Check if model is valid
     if (!VALID_VIDEO_MODELS.includes(model)) {
-      console.error(`Warning: Provided model ${model} is invalid, using default value ${DEFAULT_T2V_MODEL}`);
+      // console.error(`Warning: Provided model ${model} is invalid, using default value ${DEFAULT_T2V_MODEL}`);
       return DEFAULT_T2V_MODEL;
     }
-    
+
     return model;
   }
 }

@@ -57,13 +57,13 @@ export class ConfigManager {
     }
 
     // Apply configurations in order from low to high priority
-    
+
     // 1. Apply configuration from config file (low priority - 4)
     this.applyConfigFile(config);
-    
+
     // 2. Apply configuration from environment variables (medium priority - 3)
     this.applyEnvVars(config);
-    
+
     // 3. Apply configuration from command line arguments (high priority - 2)
     this.applyCliArgs(config);
 
@@ -72,7 +72,7 @@ export class ConfigManager {
       Object.assign(config, requestConfig);
     }
 
-    console.log(`[${new Date().toISOString()}] Configuration loaded, transport mode: ${config.server?.mode || DEFAULT_TRANSPORT_MODE}`);
+    // console.log(`[${new Date().toISOString()}] Configuration loaded, transport mode: ${config.server?.mode || DEFAULT_TRANSPORT_MODE}`);
 
     return config;
   }
@@ -229,11 +229,11 @@ export class ConfigManager {
 
           // Merge configuration
           this.mergeConfig(config, fileConfig);
-          console.log(`[${new Date().toISOString()}] Loaded configuration from file: ${file}`);
+          // console.log(`[${new Date().toISOString()}] Loaded configuration from file: ${file}`);
           break;
         }
       } catch (error) {
-        console.warn(`[${new Date().toISOString()}] Failed to read configuration file: ${file}`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to read configuration file: ${file}`, error);
       }
     }
   }

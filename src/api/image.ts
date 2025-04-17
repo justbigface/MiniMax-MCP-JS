@@ -101,13 +101,13 @@ export class ImageAPI {
     if (!model) {
       return DEFAULT_T2I_MODEL;
     }
-    
+
     // Validate if model is valid
     if (!VALID_IMAGE_MODELS.includes(model)) {
-      console.error(`Warning: Provided image model ${model} is invalid, using default value ${DEFAULT_T2I_MODEL}`);
+      // console.error(`Warning: Provided image model ${model} is invalid, using default value ${DEFAULT_T2I_MODEL}`);
       return DEFAULT_T2I_MODEL;
     }
-    
+
     return model;
   }
 }

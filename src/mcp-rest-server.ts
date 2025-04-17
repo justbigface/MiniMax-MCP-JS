@@ -95,7 +95,7 @@ export class MCPRestServer {
       };
     }
 
-    console.log(`[${new Date().toISOString()}] REST server configuration initialized`);
+    // console.log(`[${new Date().toISOString()}] REST server configuration initialized`);
   }
 
   /**
@@ -115,7 +115,7 @@ export class MCPRestServer {
     this.api = new MiniMaxAPI(this.config);
     this.mediaService = new MediaService(this.api);
 
-    console.log(`[${new Date().toISOString()}] REST server configuration updated`);
+    // console.log(`[${new Date().toISOString()}] REST server configuration updated`);
   }
 
   /**
@@ -164,7 +164,7 @@ export class MCPRestServer {
       }
 
       if (metaAuth && typeof metaAuth === 'object') {
-        console.log(`[${new Date().toISOString()}] Getting configuration from request meta.auth`);
+        // console.log(`[${new Date().toISOString()}] Getting configuration from request meta.auth`);
 
         // Use ConfigManager to extract configuration
         const metaAuthConfig = ConfigManager.extractConfigFromMetaAuth(metaAuth);
@@ -173,7 +173,7 @@ export class MCPRestServer {
         }
       }
     } catch (error) {
-      console.warn(`[${new Date().toISOString()}] Failed to extract configuration from meta.auth:`, error);
+      // console.warn(`[${new Date().toISOString()}] Failed to extract configuration from meta.auth:`, error);
     }
 
     return config;
@@ -303,7 +303,7 @@ export class MCPRestServer {
         const maskedKey = apiKey
           ? `${apiKey.substring(0, 4)}****${apiKey.substring(apiKey.length - 4)}`
           : 'not provided';
-        console.log(`[${new Date().toISOString()}] Using API key: ${maskedKey} to call tool: ${toolName}`);
+        // console.log(`[${new Date().toISOString()}] Using API key: ${maskedKey} to call tool: ${toolName}`);
 
         // Choose different handler function based on tool name
         switch (toolName) {
@@ -347,7 +347,7 @@ export class MCPRestServer {
       return result;
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to generate speech, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to generate speech, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
         // Delay retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleTextToAudio(args, api, mediaService, attempt + 1);
@@ -366,7 +366,7 @@ export class MCPRestServer {
       return result;
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to list voices, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to list voices, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
         // Delay retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleListVoices(args, api, mediaService, attempt + 1);
@@ -404,7 +404,7 @@ export class MCPRestServer {
       return result;
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to generate image, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to generate image, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
         // Delay retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleTextToImage(args, api, mediaService, attempt + 1);
@@ -423,7 +423,7 @@ export class MCPRestServer {
       return result;
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to generate video, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to generate video, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
         // Delay retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleGenerateVideo(args, api, mediaService, attempt + 1);
@@ -461,7 +461,7 @@ export class MCPRestServer {
 
       // Regular retry mechanism
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to clone voice, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to clone voice, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
         // Delay retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleVoiceClone(args, api, mediaService, attempt + 1);
@@ -496,7 +496,7 @@ export class MCPRestServer {
       return result;
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`[${new Date().toISOString()}] Failed to generate video, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
+        // console.warn(`[${new Date().toISOString()}] Failed to generate video, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS})`, error);
         // Delay retry
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleImageToVideo(args, api, mediaService, attempt + 1);
@@ -600,9 +600,9 @@ export class MCPRestServer {
       // Start HTTP server
       await this.transport.startServer();
 
-      console.log(`[${new Date().toISOString()}] MiniMax MCP REST server started at: http://localhost:${port}${endpoint}`);
+      // console.log(`[${new Date().toISOString()}] MiniMax MCP REST server started at: http://localhost:${port}${endpoint}`);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to start REST server:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to start REST server:`, error);
       throw error;
     }
   }
@@ -615,10 +615,10 @@ export class MCPRestServer {
       if (this.transport) {
         await this.transport.close();
         this.transport = null;
-        console.log(`[${new Date().toISOString()}] REST server stopped`);
+        // console.log(`[${new Date().toISOString()}] REST server stopped`);
       }
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] Failed to stop REST server:`, error);
+      // console.error(`[${new Date().toISOString()}] Failed to stop REST server:`, error);
       throw error;
     }
   }
