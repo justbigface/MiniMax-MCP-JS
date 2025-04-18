@@ -21,6 +21,13 @@ export async function startMiniMaxMCP(customConfig?: Partial<Config>): Promise<v
     const config = ConfigManager.getConfig(customConfig);
     const mode = config.server?.mode || DEFAULT_TRANSPORT_MODE;
     // console.log(`[${new Date().toISOString()}] Using transport mode: ${mode}`);
+
+    if (mode === TRANSPORT_MODE_REST) {
+      config.server = config.server || {};
+      config.server.port = config.server.port || 3000;
+      // console.log(`[WARN] No --port specified for REST; defaulting to ${config.server.port}`);
+    }
+
     switch (mode) {
       case TRANSPORT_MODE_REST:
         // console.log(`[${new Date().toISOString()}] Starting REST server`);
@@ -46,15 +53,19 @@ function isCLIEntry(): boolean {
 
   try {
     const invoked = process.argv[1] ? fs.realpathSync(process.argv[1]) : '';
-    const self    = fs.realpathSync(fileURLToPath(import.meta.url));
+    const self = fs.realpathSync(fileURLToPath(import.meta.url));
     if (invoked === self) return true;
   } catch {
-    //
+    /* ignore */
   }
 
-  const invokedName = process.argv[1] && path.basename(process.argv[1]);
-  const selfName    = path.basename(fileURLToPath(import.meta.url));
-  return invokedName === selfName;
+  const invokedName = process.argv[1] ? path.basename(process.argv[1]) : '';
+  const selfName = path.basename(fileURLToPath(import.meta.url));
+
+  if (invokedName === selfName) return true; // node build/index.js
+  if (invokedName === 'minimax-mcp-js') return true; // global bin
+
+  return false;
 }
 
 if (isCLIEntry()) {
@@ -65,12 +76,24 @@ if (isCLIEntry()) {
       default: DEFAULT_TRANSPORT_MODE,
       describe: 'transport mode (rest | sse | stdio)',
     })
+    .option('port', {
+      alias: 'p',
+      type: 'number',
+      default: 3000,
+      describe: 'port for REST server (only applies when --mode=rest)',
+    })
     .help()
     .parseSync();
 
-  startMiniMaxMCP({
+  const customCfg: Partial<Config> = {
     server: { mode: argv.mode as TransportMode },
-  }).catch((err) => {
+  };
+
+  if (argv.port) {
+    customCfg.server!.port = argv.port;
+  }
+
+  startMiniMaxMCP(customCfg).catch((err) => {
     // console.error(err);
     process.exit(1);
   });

@@ -576,15 +576,6 @@ export class MCPRestServer {
    */
   public async start(): Promise<void> {
     try {
-      // Validate necessary configuration
-      if (!this.config.apiKey) {
-        throw new Error(ERROR_API_KEY_REQUIRED);
-      }
-
-      if (!this.config.apiHost) {
-        throw new Error(ERROR_API_HOST_REQUIRED);
-      }
-
       const port = this.config.server?.port || DEFAULT_SERVER_PORT;
       const endpoint = this.config.server?.endpoint || DEFAULT_SERVER_ENDPOINT;
 
