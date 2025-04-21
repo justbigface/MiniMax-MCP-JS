@@ -101,7 +101,7 @@ Go to `Claude > Settings > Developer > Edit Config > claude_desktop_config.json`
         "minimax-mcp-js"
       ],
       "env": {
-        "MINIMAX_API_HOST": "https://api.minimaxi.chat",
+        "MINIMAX_API_HOST": "<https://api.minimaxi.chat|https://api.minimax.chat>",
         "MINIMAX_API_KEY": "<your-api-key-here>",
         "MINIMAX_MCP_BASE_PATH": "<local-output-dir-path, such as /User/xxx/Desktop>",
         "MINIMAX_RESOURCE_MODE": "<optional, [url|local], url is default, audio/image/video are downloaded locally or provided in URL format>"
@@ -157,7 +157,7 @@ In platform hosting environments (like ModelScope or other MCP platforms), you c
     "meta": {
       "auth": {
         "api_key": "your_api_key_here",
-        "api_host": "https://api.minimaxi.chat",
+        "api_host": "<https://api.minimaxi.chat|https://api.minimaxi.chat>",
         "base_path": "/path/to/output",
         "resource_mode": "url"
       }
@@ -177,7 +177,7 @@ import { startMiniMaxMCP } from 'minimax-mcp-js';
 
 await startMiniMaxMCP({
   apiKey: 'your_api_key_here',
-  apiHost: 'https://api.minimaxi.chat',
+  apiHost: 'https://api.minimaxi.chat', // Global Host - https://api.minimaxi.chat, Mainland Host - https://api.minimax.chat
   basePath: '/path/to/output',
   resourceMode: 'url'
 });
@@ -202,7 +202,7 @@ MINIMAX_API_KEY=your_api_key_here
 # Base path for output files (optional, defaults to user's desktop)
 MINIMAX_MCP_BASE_PATH=~/Desktop
 
-# MiniMax API Host (optional, defaults to https://api.minimaxi.chat)
+# MiniMax API Host (optional, defaults to https://api.minimaxi.chat, Global Host - https://api.minimaxi.chat, Mainland Host - https://api.minimax.chat)
 MINIMAX_API_HOST=https://api.minimaxi.chat
 
 # Resource mode (optional, defaults to 'url')
@@ -227,7 +227,7 @@ This prioritization ensures flexibility across different deployment scenarios wh
 | Parameter | Description | Default Value |
 |-----------|-------------|---------------|
 | apiKey | MiniMax API Key | None (Required) |
-| apiHost | MiniMax API Host | https://api.minimaxi.chat |
+| apiHost | MiniMax API Host | Global Host - https://api.minimaxi.chat, Mainland Host - https://api.minimax.chat |
 | basePath | Base path for output files | User's desktop |
 | resourceMode | Resource handling mode, 'url' or 'local' | url |
 
