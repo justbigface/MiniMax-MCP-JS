@@ -69,7 +69,7 @@ MiniMax MCP JS 实现了 [Model Context Protocol (MCP)](https://github.com/anthr
 ### 使用 MCP 客户端的快速开始
 
 1. 从[MiniMax国内开放平台](https://platform.minimaxi.com/user-center/basic-information/interface-key)或[MiniMax国际开放平台](https://www.minimax.io/platform/user-center/basic-information/interface-key)获取您的 API 密钥。
-2. 使用 pnpm 安装包：`pnpm add minimax-mcp-js`
+2. 确保你已经安装了 [Node.js 和 npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 3. **重要提示: API的服务器地址和密钥在不同区域有所不同**，两者需要匹配，否则会有 `invalid api key` 的错误
 
 |地区| 国际  | 国内  |
@@ -79,13 +79,7 @@ MiniMax MCP JS 实现了 [Model Context Protocol (MCP)](https://github.com/anthr
 
 ### 通过 MCP 客户端使用（推荐）
 
-1. 全局安装 CLI 工具：
-```bash
-# 全局安装
-pnpm install -g minimax-mcp-js
-```
-
-2. 在 MCP 客户端中配置：
+在 MCP 客户端中配置：
 
 #### Claude Desktop
 
@@ -97,6 +91,7 @@ pnpm install -g minimax-mcp-js
     "minimax-mcp-js": {
       "command": "npx",
       "args": [
+        "-y",
         "minimax-mcp-js"
       ],
       "env": {
@@ -184,7 +179,13 @@ await startMiniMaxMCP({
 
 ### 3. 命令行参数
 
-当作为CLI工具使用时，可以通过命令行参数提供配置：
+1. 全局安装 CLI 工具：
+```bash
+# 全局安装
+pnpm install -g minimax-mcp-js
+```
+
+2. 当作为CLI工具使用时，可以通过命令行参数提供配置：
 
 ```bash
 minimax-mcp-js --api-key 您的API密钥 --api-host https://api.minimax.chat --base-path /输出路径 --resource-mode url
