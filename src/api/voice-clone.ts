@@ -32,16 +32,27 @@ export class VoiceCloneAPI {
         // Handle URL file
         try {
           const response = await requests.default.get(request.audioFile, { responseType: 'stream' });
+          const tempFilePath = path.join(process.cwd(), 'temp', path.basename(request.audioFile));
+          
+          // Ensure temp directory exists
+          const tempDir = path.dirname(tempFilePath);
+          if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+          }
 
-          // Prepare upload parameters with URL stream
-          const fileName = path.basename(request.audioFile);
+          // Save stream to temp file
+          const writer = fs.createWriteStream(tempFilePath);
+          response.data.pipe(writer);
+
+          await new Promise<void>((resolve, reject) => {
+            writer.on('finish', () => resolve());
+            writer.on('error', reject);
+          });
+
+          // Prepare upload parameters with temp file
           files = {
             file: {
-              value: response.data,
-              options: {
-                filename: fileName,
-                contentType: 'audio/mpeg',
-              },
+              path: tempFilePath,
             },
           };
         } catch (error) {
@@ -49,39 +60,27 @@ export class VoiceCloneAPI {
         }
       } else {
         // Handle local file
-        let fileBuffer: Buffer;
-        let fileName: string;
-
-        // Read and open file
         try {
           const filePath = processInputFile(request.audioFile);
-
-          fileBuffer = fs.readFileSync(filePath);
-          fileName = path.basename(filePath);
+          
+          // Prepare upload parameters
+          files = {
+            file: {
+              path: filePath,
+            },
+          };
         } catch (error) {
           throw new MinimaxRequestError(`Failed to read local file: ${String(error)}`);
         }
-
-        // Prepare upload parameters
-        files = {
-          file: {
-            value: fileBuffer,
-            options: {
-              filename: fileName,
-            },
-          },
-        };
       }
 
       const data = {
+        files,
         purpose: 'voice_clone',
       };
 
       // Upload file
-      const uploadResponse = await this.api.post<any>('/v1/files/upload', {
-        files,
-        ...data,
-      });
+      const uploadResponse = await this.api.post<any>('/v1/files/upload', data);
 
       // Get file ID
       const fileId = uploadResponse?.file?.file_id;
