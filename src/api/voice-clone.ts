@@ -26,14 +26,13 @@ export class VoiceCloneAPI {
 
     try {
       // Step 1: Upload file
-      let formData: FormData;
       let files: any;
-      
+
       if (request.isUrl) {
         // Handle URL file
         try {
           const response = await requests.default.get(request.audioFile, { responseType: 'stream' });
-          
+
           // Prepare upload parameters with URL stream
           const fileName = path.basename(request.audioFile);
           files = {
@@ -41,44 +40,47 @@ export class VoiceCloneAPI {
               value: response.data,
               options: {
                 filename: fileName,
-                contentType: 'audio/mpeg'
-              }
-            }
+                contentType: 'audio/mpeg',
+              },
+            },
           };
         } catch (error) {
           throw new MinimaxRequestError(`Failed to download audio from URL: ${String(error)}`);
         }
       } else {
         // Handle local file
-        const filePath = processInputFile(request.audioFile);
-        
+        let fileBuffer: Buffer;
+        let fileName: string;
+
         // Read and open file
         try {
-          const file = fs.readFileSync(filePath);
-          const fileName = path.basename(filePath);
+          const filePath = processInputFile(request.audioFile);
 
-          // Prepare upload parameters
-          files = {
-            file: {
-              value: file,
-              options: {
-                filename: fileName
-              }
-            }
-          };
+          fileBuffer = fs.readFileSync(filePath);
+          fileName = path.basename(filePath);
         } catch (error) {
           throw new MinimaxRequestError(`Failed to read local file: ${String(error)}`);
         }
+
+        // Prepare upload parameters
+        files = {
+          file: {
+            value: fileBuffer,
+            options: {
+              filename: fileName,
+            },
+          },
+        };
       }
 
       const data = {
-        purpose: 'voice_clone'
+        purpose: 'voice_clone',
       };
 
       // Upload file
       const uploadResponse = await this.api.post<any>('/v1/files/upload', {
         files,
-        ...data
+        ...data,
       });
 
       // Get file ID
@@ -90,7 +92,7 @@ export class VoiceCloneAPI {
       // Step 2: Clone voice
       const payload: Record<string, any> = {
         file_id: fileId,
-        voice_id: request.voiceId
+        voice_id: request.voiceId,
       };
 
       // If demo text is provided, add it to the request

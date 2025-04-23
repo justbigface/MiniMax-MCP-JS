@@ -1,21 +1,19 @@
 import { Config, TransportMode } from '../types/index.js';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import {
+  DEFAULT_API_HOST,
   DEFAULT_SERVER_ENDPOINT,
   DEFAULT_SERVER_PORT,
-  DEFAULT_API_HOST,
-  DEFAULT_TRANSPORT_MODE,
-  RESOURCE_MODE_URL,
-  TRANSPORT_MODE_STDIO,
-  ENV_MINIMAX_API_KEY,
   ENV_MINIMAX_API_HOST,
+  ENV_MINIMAX_API_KEY,
   ENV_MINIMAX_MCP_BASE_PATH,
   ENV_RESOURCE_MODE,
-  ENV_SERVER_PORT,
   ENV_SERVER_ENDPOINT,
-  ENV_TRANSPORT_MODE
+  ENV_SERVER_PORT,
+  ENV_TRANSPORT_MODE,
+  RESOURCE_MODE_URL,
+  TRANSPORT_MODE_STDIO,
 } from '../const/index.js';
 
 /**
@@ -36,7 +34,7 @@ export class ConfigManager {
    */
   static getConfig(requestConfig: Partial<Config> = {}, defaultConfig: Partial<Config> = {}): Config {
     // Get user desktop path as default output path
-    const DesktopPath = path.join(os.homedir(), 'Desktop');
+    const DesktopPath = process.env[ENV_MINIMAX_MCP_BASE_PATH]!;
 
     // Create base configuration (lowest priority - 5)
     const config: Config = {
@@ -47,8 +45,8 @@ export class ConfigManager {
       server: {
         port: DEFAULT_SERVER_PORT,
         endpoint: DEFAULT_SERVER_ENDPOINT,
-        mode: TRANSPORT_MODE_STDIO
-      }
+        mode: TRANSPORT_MODE_STDIO,
+      },
     };
 
     // Merge default configuration (lowest priority - 5)
@@ -216,10 +214,7 @@ export class ConfigManager {
    * Apply configuration file to configuration
    */
   private static applyConfigFile(config: Config): void {
-    const configFiles = [
-      'example.minimax-config.json',
-      path.join(process.cwd(), 'example.minimax-config.json')
-    ];
+    const configFiles = ['example.minimax-config.json', path.join(process.cwd(), 'example.minimax-config.json')];
 
     for (const file of configFiles) {
       try {
