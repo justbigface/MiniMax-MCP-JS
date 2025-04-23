@@ -69,7 +69,7 @@ MiniMax MCP JS implements the [Model Context Protocol (MCP)](https://github.com/
 ### Quickstart with MCP Client
 
 1. Get your API key from [MiniMax International Platform](https://www.minimax.io/platform/user-center/basic-information/interface-key).
-2. Install [minimax-mcp-js](https://www.npmjs.com/package/minimax-mcp-js) using pnpm: `pnpm add minimax-mcp-js`
+2. Make sure that you already installed [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 3. **Important: API HOST&KEY are different in different region**, they must match, otherwise you will receive an `Invalid API key` error.
 
 |Region| Global  | Mainland  |
@@ -80,13 +80,7 @@ MiniMax MCP JS implements the [Model Context Protocol (MCP)](https://github.com/
 
 ### Using with MCP Clients (Recommended)
 
-1. Install the CLI tool globally:
-```bash
-# Install globally
-pnpm install -g minimax-mcp-js
-```
-
-2. Configure your MCP client:
+Configure your MCP client:
 
 #### Claude Desktop
 
@@ -98,6 +92,7 @@ Go to `Claude > Settings > Developer > Edit Config > claude_desktop_config.json`
     "minimax-mcp-js": {
       "command": "npx",
       "args": [
+        "-y",
         "minimax-mcp-js"
       ],
       "env": {
@@ -185,7 +180,13 @@ await startMiniMaxMCP({
 
 ### 3. Command Line Arguments
 
-When used as a CLI tool, you can provide configuration via command line arguments:
+1. Install the CLI tool globally:
+```bash
+# Install globally
+pnpm install -g minimax-mcp-js
+```
+
+2. When used as a CLI tool, you can provide configuration via command line arguments:
 
 ```bash
 minimax-mcp-js --api-key your_api_key_here --api-host https://api.minimaxi.chat --base-path /path/to/output --resource-mode url
