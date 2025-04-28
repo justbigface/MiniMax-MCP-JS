@@ -234,7 +234,7 @@ This prioritization ensures flexibility across different deployment scenarios wh
 
 ⚠️ **Note**: The API key needs to match the host address. Different hosts are used for global and mainland China versions:
 - Global Host: `https://api.minimaxi.chat` (note the extra "i")
-- Mainland China Host: `https://api.minimaxi.chat`
+- Mainland China Host: `https://api.minimax.chat`
 
 ## Example usage
 
