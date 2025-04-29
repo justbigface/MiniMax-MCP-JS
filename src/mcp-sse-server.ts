@@ -156,10 +156,11 @@ export class MCPSSEServer {
     this.registerTextToAudioTool();
     this.registerListVoicesTool();
     this.registerPlayAudioTool();
+    this.registerVoiceCloneTool();
     this.registerTextToImageTool();
     this.registerGenerateVideoTool();
-    this.registerVoiceCloneTool();
     this.registerImageToVideoTool();
+    this.registerQueryVideoGenerationTool();
   }
 
   /**
@@ -369,6 +370,65 @@ export class MCPSSEServer {
   }
 
   /**
+   * Register voice clone tool
+   */
+  private registerVoiceCloneTool(): void {
+    this.mcpServer.tool(
+      'voice_clone',
+      'Clone a voice using the provided audio file. New voices will incur costs when first used.\n\nNote: This tool calls MiniMax API and may incur costs. Use only when explicitly requested by the user.',
+      {
+        voiceId: z.string().describe('Voice ID to use'),
+        audioFile: z.string().describe('Path to the audio file'),
+        text: z.string().optional().describe('Text for the demo audio'),
+        outputDirectory: z.string().optional().describe('Directory to save the output file'),
+        isUrl: z.boolean().optional().default(false).describe('Whether the audio file is a URL'),
+      },
+      async (params) => {
+        try {
+          const result = await this.voiceCloneApi.cloneVoice(params);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Voice cloning successful: ${result}`,
+              },
+            ],
+          };
+        } catch (error) {
+          // Check if this is a real-name verification error
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          if (errorMessage.includes('voice clone user forbidden') ||
+              errorMessage.includes('should complete real-name verification')) {
+
+            // Domestic platform verification URL
+            const verificationUrl = 'https://platform.minimaxi.com/user-center/basic-information';
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Voice cloning failed: Real-name verification required. To use voice cloning feature, please:\n\n1. Visit MiniMax platform (${verificationUrl})\n2. Complete the real-name verification process\n3. Try again after verification is complete\n\nThis requirement is for security and compliance purposes.`,
+                },
+              ],
+            };
+          }
+
+          // Regular error handling
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Voice cloning failed: ${error instanceof Error ? error.message : String(error)}`,
+              },
+            ],
+          };
+        }
+      },
+    );
+  }
+
+  /**
    * Register text-to-image tool
    */
   private registerTextToImageTool(): void {
@@ -455,6 +515,11 @@ export class MCPSSEServer {
           .string()
           .optional()
           .describe('Path to save the generated video file, automatically generated if not provided'),
+        asyncMode: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe('Whether to use async mode. Defaults to False. If True, the video generation task will be submitted asynchronously and the response will return a task_id. Should use `query_video_generation` tool to check the status of the task and get the result.'),
       },
       async (params) => {
         try {
@@ -466,13 +531,24 @@ export class MCPSSEServer {
 
           const result = await this.videoApi.generateVideo(params);
 
+          if (params.asyncMode) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Success. Video generation task submitted: Task ID: ${result.task_id}. Please use \`query_video_generation\` tool to check the status of the task and get the result.`,
+                },
+              ],
+            };
+          }
+
           // Handle different output formats
           if (this.config.resourceMode === RESOURCE_MODE_URL) {
             return {
               content: [
                 {
                   type: 'text',
-                  text: `Success. Video URL: ${result}`,
+                  text: `Success. Video URL: ${result.video_url}`,
                 },
               ],
             };
@@ -481,7 +557,7 @@ export class MCPSSEServer {
               content: [
                 {
                   type: 'text',
-                  text: `Video saved: ${result}`,
+                  text: `Video saved: ${result.video_path}`,
                 },
               ],
             };
@@ -492,65 +568,6 @@ export class MCPSSEServer {
               {
                 type: 'text',
                 text: `Failed to generate video: ${error instanceof Error ? error.message : String(error)}`,
-              },
-            ],
-          };
-        }
-      },
-    );
-  }
-
-  /**
-   * Register voice clone tool
-   */
-  private registerVoiceCloneTool(): void {
-    this.mcpServer.tool(
-      'voice_clone',
-      'Clone a voice using the provided audio file. New voices will incur costs when first used.\n\nNote: This tool calls MiniMax API and may incur costs. Use only when explicitly requested by the user.',
-      {
-        voiceId: z.string().describe('Voice ID to use'),
-        audioFile: z.string().describe('Path to the audio file'),
-        text: z.string().optional().describe('Text for the demo audio'),
-        outputDirectory: z.string().optional().describe('Directory to save the output file'),
-        isUrl: z.boolean().optional().default(false).describe('Whether the audio file is a URL'),
-      },
-      async (params) => {
-        try {
-          const result = await this.voiceCloneApi.cloneVoice(params);
-
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Voice cloning successful: ${result}`,
-              },
-            ],
-          };
-        } catch (error) {
-          // Check if this is a real-name verification error
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes('voice clone user forbidden') ||
-              errorMessage.includes('should complete real-name verification')) {
-
-            // Domestic platform verification URL
-            const verificationUrl = 'https://platform.minimaxi.com/user-center/basic-information';
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Voice cloning failed: Real-name verification required. To use voice cloning feature, please:\n\n1. Visit MiniMax platform (${verificationUrl})\n2. Complete the real-name verification process\n3. Try again after verification is complete\n\nThis requirement is for security and compliance purposes.`,
-                },
-              ],
-            };
-          }
-
-          // Regular error handling
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Voice cloning failed: ${error instanceof Error ? error.message : String(error)}`,
               },
             ],
           };
@@ -579,6 +596,11 @@ export class MCPSSEServer {
           .string()
           .optional()
           .describe('Path to save the generated video file, automatically generated if not provided'),
+        asyncMode: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe('Whether to use async mode. Defaults to False. If True, the video generation task will be submitted asynchronously and the response will return a task_id. Should use `query_video_generation` tool to check the status of the task and get the result.'),
       },
       async (params) => {
         try {
@@ -590,13 +612,24 @@ export class MCPSSEServer {
 
           const result = await this.videoApi.generateVideo(params);
 
+          if (params.asyncMode) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Success. Video generation task submitted: Task ID: ${result.task_id}. Please use \`query_video_generation\` tool to check the status of the task and get the result.`,
+                },
+              ],
+            };
+          }
+
           // Handle different output formats
           if (this.config.resourceMode === RESOURCE_MODE_URL) {
             return {
               content: [
                 {
                   type: 'text',
-                  text: `Success. Video URL: ${result}`,
+                  text: `Success. Video URL: ${result.video_url}`,
                 },
               ],
             };
@@ -605,7 +638,7 @@ export class MCPSSEServer {
               content: [
                 {
                   type: 'text',
-                  text: `Video saved: ${result}`,
+                  text: `Video saved: ${result.video_path}`,
                 },
               ],
             };
@@ -621,6 +654,71 @@ export class MCPSSEServer {
           };
         }
       }
+    );
+  }
+
+  /**
+   * Register query video generation tool
+   */
+  private registerQueryVideoGenerationTool(): void {
+    this.server.tool(
+      'query_video_generation',
+      'Query the status of a video generation task.',
+      {
+        taskId: z
+          .string()
+          .describe('The Task ID to query. Should be the task_id returned by `generate_video` tool if `async_mode` is True.'),
+        outputDirectory: z
+          .string()
+          .optional()
+          .describe('The directory to save the video to'),
+      },
+      async (params: any) => {
+        try {
+          // No need to update configuration from request parameters in stdio mode
+          const result = await this.videoApi.queryVideoGeneration(params);
+
+          if (result.status === 'Success') {
+            if (this.config.resourceMode === RESOURCE_MODE_URL) {
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: `Success. Video URL: ${result.video_url}`, 
+                  },
+                ],
+              };
+            } else {
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: `Success. Video saved as: ${result.video_path}`,
+                  },
+                ],
+              };
+            }
+          } else {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Video generation task is still processing: Task ID: ${params.taskId}.`,
+                },
+              ],
+            };
+          }
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Failed to query video generation: ${error instanceof Error ? error.message : String(error)}`,
+              },
+            ],
+          };
+        }
+      },
     );
   }
 

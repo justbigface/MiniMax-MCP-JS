@@ -126,7 +126,7 @@ export class MediaService extends BaseService {
    * @param params Video generation parameters
    * @returns Generation result (URL or file path)
    */
-  public async generateVideo(params: any): Promise<string> {
+  public async generateVideo(params: any): Promise<any> {
     this.checkInitialized();
     try {
       // Auto-generate output filename if not provided
@@ -135,7 +135,35 @@ export class MediaService extends BaseService {
         params.outputFile = `video_${promptPrefix}_${Date.now()}`;
       }
 
-      return await this.videoApi.generateVideo(params);
+      const result = await this.videoApi.generateVideo(params);
+      if (params.async_mode) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Success. Video generation task submitted: Task ID: ${result.task_id}. Please use \`query_video_generation\` tool to check the status of the task and get the result.`,
+            },
+          ],
+        };
+      } else if (this.config.resourceMode === RESOURCE_MODE_URL) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Success. Video URL: ${result.video_url}`,
+            },
+          ],
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Success. Video saved as: ${result.video_path}`,
+            },
+          ],
+        };
+      }
     } catch (error) {
       // console.error(`[${new Date().toISOString()}] Failed to generate video:`, error);
       throw this.wrapError('Failed to generate video', error);
@@ -143,54 +171,46 @@ export class MediaService extends BaseService {
   }
 
   /**
-   * Format response
-   * @param result Response result
-   * @param successMessage Success message
-   * @returns Formatted response
+   * Query video generation
+   * @param params Video generation query parameters
+   * @returns Query result
    */
-  public formatResponse(result: string | string[], successMessage: string): any {
-    if (this.config.resourceMode === RESOURCE_MODE_URL) {
-      // URL mode
-      if (Array.isArray(result)) {
-        return {
+  public async queryVideoGeneration(params: any): Promise<any> {
+    this.checkInitialized();
+    try {
+      const result = await this.videoApi.queryVideoGeneration(params);
+      if (result.status === 'Success') {
+        if (this.config.resourceMode === RESOURCE_MODE_URL) {
+          return {
           content: [
-            {
-              type: 'text',
-              text: `${successMessage}: ${result.join(', ')}`,
-            },
-          ],
-        };
+              {
+                type: 'text',
+                text: `Success. Video URL: ${result.video_url}`,
+              },
+            ],
+          };
+        } else {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Success. Video saved as: ${result.video_path}`,
+              },
+            ],
+          };
+        }
       } else {
         return {
           content: [
             {
               type: 'text',
-              text: `${successMessage}: ${result}`,
+              text: `Video generation task is still processing: Task ID: ${params.taskId}.`,
             },
           ],
         };
       }
-    } else {
-      // File mode
-      if (Array.isArray(result)) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `${successMessage}: ${result.join(', ')}`,
-            },
-          ],
-        };
-      } else {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `${successMessage}: ${result}`,
-            },
-          ],
-        };
-      }
+    } catch (error) {
+      throw this.wrapError('Failed to query video generation status', error);
     }
   }
 

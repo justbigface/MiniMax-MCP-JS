@@ -282,6 +282,28 @@ Parameters:
 - `outputDirectory`: Directory to save the output file (optional)
 - `outputFile`: Path to save the output file (optional, auto-generated if not provided)
 
+### Play Audio
+
+Play an audio file. Supports WAV and MP3 formats. Does not support video.
+
+Tool Name: `play_audio`
+
+Parameters:
+- `inputFilePath`: Path to the audio file to play (required)
+- `isUrl`: Whether the audio file is a URL, default is false
+
+### Voice Clone
+
+Clone a voice from an audio file.
+
+Tool Name: `voice_clone`
+
+Parameters:
+- `audioFile`: Path to audio file (required)
+- `voiceId`: Voice ID (required)
+- `text`: Text for demo audio (optional)
+- `outputDirectory`: Directory to save the output file (optional)
+
 ### Text to Image
 
 Generate images based on text prompts.
@@ -297,6 +319,7 @@ Parameters:
 - `subjectReference`: Path to local image file or public URL for character reference (optional)
 - `outputDirectory`: Directory to save the output file (optional)
 - `outputFile`: Path to save the output file (optional, auto-generated if not provided)
+- `asyncMode`: Whether to use async mode. Defaults to False. If True, the video generation task will be submitted asynchronously and the response will return a task_id. Should use `query_video_generation` tool to check the status of the task and get the result. (optional)
 
 ### Generate Video
 
@@ -310,17 +333,16 @@ Parameters:
 - `firstFrameImage`: Path to first frame image (optional)
 - `outputDirectory`: Directory to save the output file (optional)
 - `outputFile`: Path to save the output file (optional, auto-generated if not provided)
+- `asyncMode`: Whether to use async mode. Defaults to False. If True, the video generation task will be submitted asynchronously and the response will return a task_id. Should use `query_video_generation` tool to check the status of the task and get the result. (optional)
 
-### Voice Clone
+### Query Video Generation Status
 
-Clone a voice from an audio file.
+Query the status of a video generation task.
 
-Tool Name: `voice_clone`
+Tool Name: `query_video_generation`
 
 Parameters:
-- `audioFile`: Path to audio file (required)
-- `voiceId`: Voice ID (required)
-- `text`: Text for demo audio (optional)
+- `taskId`: The Task ID to query. Should be the task_id returned by `generate_video` tool if `async_mode` is True. (required)
 - `outputDirectory`: Directory to save the output file (optional)
 
 ## Development

@@ -39,6 +39,12 @@ export interface VideoGenerationRequest {
   firstFrameImage?: string;
   outputFile?: string;
   outputDirectory?: string;
+  asyncMode?: boolean;
+}
+
+export interface VideoGenerationQueryRequest {
+  taskId: string;
+  outputDirectory?: string;
 }
 
 export interface VoiceCloneRequest {

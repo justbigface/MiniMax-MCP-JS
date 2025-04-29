@@ -255,7 +255,8 @@ export class MCPRestServer {
                 { name: 'model', description: 'Model to use, values: ["T2V-01", "T2V-01-Director", "I2V-01", "I2V-01-Director", "I2V-01-live"]', required: false },
                 { name: 'firstFrameImage', description: 'First frame image', required: false },
                 { name: 'outputDirectory', description: 'Directory to save output file', required: false },
-                { name: 'outputFile', description: 'Output file path, auto-generated if not provided', required: false }
+                { name: 'outputFile', description: 'Output file path, auto-generated if not provided', required: false },
+                { name: 'async_mode', description: 'Whether to use async mode. Defaults to False. If True, the video generation task will be submitted asynchronously and the response will return a task_id. Should use `query_video_generation` tool to check the status of the task and get the result', required: false }
               ]
             },
             {
@@ -277,7 +278,8 @@ export class MCPRestServer {
                 { name: 'firstFrameImage', description: 'Path to first frame image', required: true },
                 { name: 'model', description: 'Model to use, values: ["I2V-01", "I2V-01-Director", "I2V-01-live"]', required: false },
                 { name: 'outputDirectory', description: 'Directory to save output file', required: false },
-                { name: 'outputFile', description: 'Output file path, auto-generated if not provided', required: false }
+                { name: 'outputFile', description: 'Output file path, auto-generated if not provided', required: false },
+                { name: 'async_mode', description: 'Whether to use async mode. Defaults to False. If True, the video generation task will be submitted asynchronously and the response will return a task_id. Should use `query_video_generation` tool to check the status of the task and get the result', required: false }
               ]
             }
           ]
@@ -327,6 +329,9 @@ export class MCPRestServer {
 
           case 'image_to_video':
             return await this.handleImageToVideo(toolParams, requestApi, mediaService);
+
+          case 'query_video_generation':
+            return await this.handleVideoGenerationQuery(toolParams, requestApi, mediaService);
 
           default:
             throw new Error(`Unknown tool: ${toolName}`);
@@ -502,6 +507,19 @@ export class MCPRestServer {
         return this.handleImageToVideo(args, api, mediaService, attempt + 1);
       }
       throw this.wrapError('Failed to generate video', error);
+    }
+  }
+
+  /**
+   * Handle video generation query request
+   */
+  private async handleVideoGenerationQuery(args: any, api: MiniMaxAPI, mediaService: MediaService, attempt = 1): Promise<any> {
+    try {
+      // Call media service to handle request
+      const result = await mediaService.queryVideoGeneration(args);
+      return result;
+    } catch (error) {
+      throw this.wrapError('Failed to query video generation', error);
     }
   }
 

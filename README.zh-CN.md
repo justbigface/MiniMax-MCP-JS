@@ -282,6 +282,37 @@ MINIMAX_RESOURCE_MODE=url
 - `outputDirectory`: 保存输出文件的目录 (可选)
 - `outputFile`: 保存输出文件的路径 (可选，如果未提供则自动生成)
 
+### 语音克隆
+
+从音频文件克隆语音。
+
+工具名称：`voice_clone`
+
+参数：
+- `audioFile`: 音频文件路径 (必需)
+- `voiceId`: 语音 ID (必需)
+- `text`: 演示音频的文本 (可选)
+- `outputDirectory`: 保存输出文件的目录 (可选)
+
+### 列出所有语音类型
+
+列出所有可用的文本转语音声音。仅在 api_host 为 https://api.minimax.chat 时支持。
+
+工具名称：`list_voices`
+
+参数：
+- `voiceType`: 要列出的语音类型，选项为 'all'（全部）, 'system'（系统）, 'voice_cloning'（克隆语音），默认为 'all'
+
+### 播放音频
+
+播放音频文件。支持 WAV 和 MP3 格式。不支持视频。
+
+工具名称：`play_audio`
+
+参数：
+- `inputFilePath`: 要播放的音频文件路径 (必需)
+- `isUrl`: 音频文件是否为 URL，默认为 false
+
 ### 文本生成图像
 
 根据文本提示生成图像。
@@ -310,17 +341,16 @@ MINIMAX_RESOURCE_MODE=url
 - `firstFrameImage`: 第一帧图像路径 (可选)
 - `outputDirectory`: 保存输出文件的目录 (可选)
 - `outputFile`: 保存输出文件的路径 (可选，如果未提供则自动生成)
+- `asyncMode`: 是否使用异步模式。默认为 False。如果为 True，视频生成任务将异步提交并返回任务 ID。需要使用 `query_video_generation` 工具来检查任务状态并获取结果。(可选)
 
-### 语音克隆
+### 查询视频生成状态
 
-从音频文件克隆语音。
+查询视频生成任务的状态。
 
-工具名称：`voice_clone`
+工具名称：`query_video_generation`
 
 参数：
-- `audioFile`: 音频文件路径 (必需)
-- `voiceId`: 语音 ID (必需)
-- `text`: 演示音频的文本 (可选)
+- `taskId`: 要查询的任务 ID。如果 `generate_video` 工具的 `async_mode` 为 True，则应使用其返回的 task_id。(必需)
 - `outputDirectory`: 保存输出文件的目录 (可选)
 
 ## 开发

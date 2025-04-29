@@ -1,5 +1,5 @@
 import { MiniMaxAPI } from '../utils/api.js';
-import { VideoGenerationRequest } from '../types/index.js';
+import { VideoGenerationQueryRequest, VideoGenerationRequest } from '../types/index.js';
 import { MinimaxRequestError } from '../exceptions/index.js';
 import { DEFAULT_T2V_MODEL, ERROR_PROMPT_REQUIRED, RESOURCE_MODE_URL, VALID_VIDEO_MODELS } from '../const/index.js';
 import * as path from 'path';
@@ -14,7 +14,7 @@ export class VideoAPI {
     this.api = api;
   }
 
-  async generateVideo(request: VideoGenerationRequest): Promise<string> {
+  async generateVideo(request: VideoGenerationRequest): Promise<any> {
     // Validate required parameters
     if (!request.prompt || request.prompt.trim() === '') {
       throw new MinimaxRequestError(ERROR_PROMPT_REQUIRED);
@@ -58,6 +58,12 @@ export class VideoAPI {
         throw new MinimaxRequestError('Unable to get task ID from response');
       }
 
+      if (request.asyncMode) {
+        return {
+          task_id: taskId,
+        }
+      }
+
       // Step 2: Wait for video generation task to complete
       let fileId: string | null = null;
       const maxRetries = 30; // Maximum 30 attempts, total duration 10 minutes (30 * 20 seconds)
@@ -97,7 +103,10 @@ export class VideoAPI {
       // If URL mode, return URL directly
       const resourceMode = this.api.getResourceMode();
       if (resourceMode === RESOURCE_MODE_URL) {
-        return downloadUrl;
+        return {
+          video_url: downloadUrl,
+          task_id: taskId,
+        };
       }
 
       // Step 4: Download and save video
@@ -114,7 +123,10 @@ export class VideoAPI {
 
         // Save file
         fs.writeFileSync(outputPath, Buffer.from(videoResponse.data));
-        return outputPath;
+        return {
+          video_path: outputPath,
+          task_id: taskId,
+        }
       } catch (error) {
         throw new MinimaxRequestError(`Failed to download or save video: ${String(error)}`);
       }
@@ -123,6 +135,68 @@ export class VideoAPI {
         throw error;
       }
       throw new MinimaxRequestError(`Unexpected error occurred during video generation: ${String(error)}`);
+    }
+  }
+
+  async queryVideoGeneration(request: VideoGenerationQueryRequest): Promise<any> {
+    const taskId = request.taskId;
+
+    // Step 1: Get video generation status
+    const response = await this.api.get<any>(`/v1/query/video_generation?task_id=${taskId}`);
+    const status = response?.status;
+    let fileId: string | null = null;
+    if (status === 'Fail') {
+      throw new MinimaxRequestError(`Video generation task failed, task ID: ${taskId}`);
+    } else if (status === 'Success') {
+      fileId = response?.file_id;
+      if (!fileId) {
+        throw new MinimaxRequestError(`File ID missing in success response, task ID: ${taskId}`);
+      }
+    } else {
+      return {
+        status,
+      }
+    }
+
+    // Step 2: Get video result
+    const fileResponse = await this.api.get<any>(`/v1/files/retrieve?file_id=${fileId}`);
+    const downloadUrl = fileResponse?.file?.download_url;
+
+    if (!downloadUrl) {
+      throw new MinimaxRequestError(`Unable to get download URL for file ID: ${fileId}`);
+    }
+
+    // If URL mode, return URL directly
+    const resourceMode = this.api.getResourceMode();
+    if (resourceMode === RESOURCE_MODE_URL) {
+      return {
+        status,
+        video_url: downloadUrl,
+        task_id: taskId,
+      };
+    }
+
+    // Step 3: Download and save video
+    const outputPath = buildOutputFile(`video_${taskId}`, request.outputDirectory, 'mp4', true);
+
+    try {
+      const videoResponse = await requests.default.get(downloadUrl, { responseType: 'arraybuffer' });
+
+      // Ensure directory exists
+      const dirPath = path.dirname(outputPath);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      // Save file
+      fs.writeFileSync(outputPath, Buffer.from(videoResponse.data));
+      return {
+        status,
+        video_path: outputPath,
+        task_id: taskId,
+      }
+    } catch (error) {
+      throw new MinimaxRequestError(`Failed to download or save video: ${String(error)}`);
     }
   }
 
