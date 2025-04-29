@@ -353,6 +353,14 @@ MINIMAX_RESOURCE_MODE=url
 - `taskId`: 要查询的任务 ID。如果 `generate_video` 工具的 `async_mode` 为 True，则应使用其返回的 task_id。(必需)
 - `outputDirectory`: 保存输出文件的目录 (可选)
 
+## 常见问题
+
+### 1. 如何使用 `generate_video` 的异步模式
+在对话开始之前定义完成规则：
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/cursor_rule2.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+或者，可以在你的本地客户端的配置中设置这些规则（例如 Cursor）：
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/cursor_video_rule.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+
 ## 开发
 
 ### 设置

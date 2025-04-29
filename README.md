@@ -345,6 +345,14 @@ Parameters:
 - `taskId`: The Task ID to query. Should be the task_id returned by `generate_video` tool if `async_mode` is True. (required)
 - `outputDirectory`: Directory to save the output file (optional)
 
+## FAQ
+
+### 1. How to use `generate_video` in async-mode
+Define completion rules before starting:
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/cursor_rule2.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+Alternatively, these rules can be configured in your IDE settings (e.g., Cursor):
+<img src="https://public-cdn-video-data-algeng.oss-cn-wulanchabu.aliyuncs.com/cursor_video_rule.png?x-oss-process=image/resize,p_50/format,webp" style="display: inline-block; vertical-align: middle;"/>
+
 ## Development
 
 ### Setup
