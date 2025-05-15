@@ -7,14 +7,6 @@ import { ConfigManager } from './config/ConfigManager.js';
 import {
   DEFAULT_SERVER_ENDPOINT,
   DEFAULT_SERVER_PORT,
-  DEFAULT_API_HOST,
-  ENV_MINIMAX_API_KEY,
-  ENV_MINIMAX_API_HOST,
-  ENV_MINIMAX_MCP_BASE_PATH,
-  ENV_RESOURCE_MODE,
-  ENV_SERVER_PORT,
-  ENV_SERVER_ENDPOINT,
-  ENV_CONFIG_PATH,
   ERROR_API_KEY_REQUIRED,
   ERROR_API_HOST_REQUIRED,
   RESOURCE_MODE_URL,
@@ -40,9 +32,8 @@ import { VideoAPI } from './api/video.js';
 import { VoiceCloneAPI } from './api/voice-clone.js';
 import { VoiceAPI } from './api/voice.js';
 import { playAudio } from './utils/audio.js';
-import { getParamValue } from '@chatmcp/sdk/utils/index.js';
-import fs from 'fs';
 import { z } from 'zod';
+import 'dotenv/config';
 
 // Heartbeat interval in milliseconds
 const HEARTBEAT_INTERVAL = 30000;
@@ -661,7 +652,7 @@ export class MCPSSEServer {
    * Register query video generation tool
    */
   private registerQueryVideoGenerationTool(): void {
-    this.server.tool(
+    this.mcpServer.tool(
       'query_video_generation',
       'Query the status of a video generation task.',
       {
@@ -754,9 +745,9 @@ export class MCPSSEServer {
       // Configure SSE route
       app.get('/sse', async (req, res) => {
         try {
-        // Create SSE transport instance
-        const transport = new SSEServerTransport(endpoint, res);
-        const sessionId = transport.sessionId || `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+          // Create SSE transport instance
+          const transport = new SSEServerTransport(endpoint, res);
+          const sessionId = transport.sessionId || `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
         // console.log(`[${new Date().toISOString()}] New SSE connection established: ${sessionId}`);
 
@@ -783,14 +774,14 @@ export class MCPSSEServer {
             lastActivityTime: Date.now()
           });
 
-        // Handle connection close
-        req.on('close', () => {
+          // Handle connection close
+          req.on('close', () => {
           // console.log(`[${new Date().toISOString()}] SSE connection closed: ${sessionId}`);
-            this.closeConnection(sessionId);
-        });
+              this.closeConnection(sessionId);
+          });
 
-        // Connect to MCP server
-        await this.mcpServer.connect(transport);
+          // Connect to MCP server
+          await this.mcpServer.connect(transport);
         // console.log(`[${new Date().toISOString()}] MCP server connection successful: ${sessionId}`);
 
           // Send initial connection confirmation event
@@ -882,7 +873,7 @@ export class MCPSSEServer {
    */
   private async handleClientMessage(transport: SSEServerTransport, req: Request, res: Response, attempt = 1): Promise<void> {
     try {
-      await transport.handlePostMessage(req, res);
+      await transport.handlePostMessage(req, res, req.body);
     } catch (error) {
       if (attempt < MAX_RETRY_ATTEMPTS) {
         // console.warn(`[${new Date().toISOString()}] Failed to handle message, attempting retry (${attempt}/${MAX_RETRY_ATTEMPTS}):`, error);
@@ -890,6 +881,7 @@ export class MCPSSEServer {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, attempt - 1)));
         return this.handleClientMessage(transport, req, res, attempt + 1);
       }
+      // console.error(`[${new Date().toISOString()}] Failed to handle message after ${MAX_RETRY_ATTEMPTS} attempts:`, error);
       throw error;
     }
   }
